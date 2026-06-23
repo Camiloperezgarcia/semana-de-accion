@@ -3,77 +3,119 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi Semana de Acción, Camilo Pérez García</title>
+<title>Mi Semana de Acción · Camilo Pérez García</title>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
     --cream:#F5F0E8;--cream-card:#FFFFFF;--navy:#1A1A2E;
-    --gold:#C9A84C;--gold-dim:rgba(201,168,76,0.12);--gold-border:rgba(201,168,76,0.4);
-    --navy-dim:rgba(26,26,46,0.06);--navy-border:rgba(26,26,46,0.15);
-    --navy-text-dim:rgba(26,26,46,0.6);--white:#FFFFFF;
-    --radius:14px;--radius-sm:8px;
+    --gold:#C9A84C;--gold-dim:rgba(201,168,76,0.10);--gold-border:rgba(201,168,76,0.35);
+    --navy-dim:rgba(26,26,46,0.05);--navy-border:rgba(26,26,46,0.12);
+    --navy-text-dim:rgba(26,26,46,0.55);--white:#FFFFFF;
+    --green:#2D8A4E;--green-dim:rgba(45,138,78,0.08);--green-border:rgba(45,138,78,0.25);
+    --radius:16px;--radius-sm:10px;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--cream);color:var(--navy);font-family:'Archivo',sans-serif;min-height:100vh;overflow-x:hidden}
-  .bg-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px);opacity:0.10}
-  .bg-orb-1{width:600px;height:600px;background:var(--gold);top:-200px;right:-200px}
-  .bg-orb-2{width:400px;height:400px;background:var(--navy);bottom:-100px;left:-100px;opacity:0.05}
+  .bg-accent{position:fixed;top:-120px;right:-120px;width:500px;height:500px;background:radial-gradient(circle,rgba(201,168,76,0.08),transparent 70%);pointer-events:none;z-index:0}
+  .bg-accent-2{position:fixed;bottom:-80px;left:-80px;width:350px;height:350px;background:radial-gradient(circle,rgba(26,26,46,0.04),transparent 70%);pointer-events:none;z-index:0}
   .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
-  .card{background:var(--cream-card);border:1px solid var(--navy-border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:620px;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(26,26,46,0.12);animation:fadeUp 0.6s ease both}
-  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--navy),var(--gold),var(--navy))}
+  .card{background:var(--cream-card);border:1px solid var(--navy-border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:620px;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(26,26,46,0.08),0 1px 3px rgba(26,26,46,0.06);animation:fadeUp 0.5s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--navy),var(--gold))}
   .progress-wrap{margin-bottom:2rem}
   .progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .progress-text{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:0.1em;text-transform:uppercase}
-  .progress-track{height:4px;background:var(--navy-dim);border-radius:2px;overflow:hidden}
-  .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),#E8C76C);border-radius:2px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)}
+  .progress-text{font-size:11px;font-weight:700;color:var(--navy);letter-spacing:0.12em;text-transform:uppercase}
+  .progress-track{height:5px;background:var(--navy-dim);border-radius:3px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--gold);border-radius:3px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)}
   .screen{display:none;animation:fadeUp 0.4s ease both}
   .screen.active{display:block}
-  h1{font-family:'Sora',sans-serif;font-size:clamp(1.8rem,4.6vw,2.3rem);font-weight:800;color:var(--navy);line-height:1.15;margin-bottom:0.5rem}
-  h1 em{color:var(--gold);font-style:normal}
-  .subtitle{font-size:16px;color:var(--navy-text-dim);line-height:1.65;margin-bottom:1.75rem}
-  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2rem}
-  .info-item{background:var(--navy-dim);border:1px solid var(--navy-border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px}
-  .info-icon{font-size:18px;flex-shrink:0}
-  .info-text{font-size:13px;color:var(--navy-text-dim);line-height:1.45}
-  .info-text strong{color:var(--navy);font-weight:600;display:block}
-  .q-number{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
-  .q-number::after{content:'';flex:1;height:1px;background:var(--gold-border)}
-  .q-text{font-family:'Sora',sans-serif;font-size:clamp(1.2rem,2.8vw,1.5rem);font-weight:700;color:var(--navy);line-height:1.4;margin-bottom:1.75rem}
+
+  /* ── Welcome ── */
+  .welcome-hero{margin-bottom:1.75rem}
+  .welcome-hero h1{font-family:'Sora',sans-serif;font-size:clamp(2rem,5vw,2.6rem);font-weight:800;color:var(--navy);line-height:1.1;margin-bottom:0.25rem}
+  .welcome-hero h1 em{color:var(--gold);font-style:normal;display:block;font-size:clamp(2.2rem,5.5vw,2.9rem)}
+  .welcome-badge{display:inline-flex;align-items:center;gap:8px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:24px;padding:6px 16px;margin-bottom:1.25rem}
+  .welcome-badge img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:center 25%}
+  .welcome-badge span{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--navy-text-dim)}
+  .welcome-badge strong{color:var(--navy);font-weight:600}
+  .welcome-desc{font-size:15px;color:var(--navy-text-dim);line-height:1.75;margin-bottom:1.5rem}
+  .welcome-desc strong{color:var(--navy);font-weight:600}
+  .feature-row{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+  .feature-chip{display:flex;align-items:center;gap:6px;background:var(--navy-dim);border:1px solid var(--navy-border);border-radius:20px;padding:8px 14px;font-size:12px;color:var(--navy-text-dim);font-weight:500}
+  .feature-chip .icon{font-size:14px}
+  .feature-chip strong{color:var(--navy);font-weight:600}
+
+  /* ── Questions ── */
+  .q-number{font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1rem}
+  .q-text{font-family:'Sora',sans-serif;font-size:clamp(1.15rem,2.6vw,1.4rem);font-weight:700;color:var(--navy);line-height:1.4;margin-bottom:1.75rem}
   .options-list{display:flex;flex-direction:column;gap:10px}
-  .option-btn{width:100%;text-align:left;background:var(--navy-dim);border:1.5px solid var(--navy-border);border-radius:var(--radius-sm);padding:15px 17px;color:var(--navy-text-dim);font-family:'DM Sans',sans-serif;font-size:16.5px;line-height:1.5;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:flex-start;gap:12px}
+  .option-btn{width:100%;text-align:left;background:var(--white);border:1.5px solid var(--navy-border);border-radius:var(--radius-sm);padding:16px 18px;color:var(--navy-text-dim);font-family:'DM Sans',sans-serif;font-size:15.5px;line-height:1.5;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:flex-start;gap:14px}
   .option-btn:hover{border-color:var(--gold-border);color:var(--navy);background:var(--gold-dim)}
-  .option-btn.selected{border-color:var(--gold);color:var(--navy);background:var(--gold-dim);box-shadow:0 0 0 3px rgba(201,168,76,0.15)}
-  .option-letter{width:24px;height:24px;border-radius:6px;flex-shrink:0;background:rgba(26,26,46,0.08);border:1px solid var(--navy-border);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;color:var(--navy-text-dim);transition:all 0.2s}
-  .option-btn.selected .option-letter{background:var(--gold);color:var(--white);border-color:var(--gold)}
-  .capture-title{font-family:'Sora',sans-serif;font-size:1.45rem;font-weight:800;color:var(--navy);margin-bottom:0.5rem}
-  .capture-sub{font-size:15.5px;color:var(--navy-text-dim);line-height:1.65;margin-bottom:1.75rem}
+  .option-btn.selected{border-color:var(--gold);color:var(--navy);background:var(--gold-dim);box-shadow:0 0 0 3px rgba(201,168,76,0.12)}
+  .option-num{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:var(--navy-dim);border:1.5px solid var(--navy-border);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--navy-text-dim);transition:all 0.2s}
+  .option-btn.selected .option-num{background:var(--gold);color:var(--white);border-color:var(--gold)}
+
+  /* ── Email capture ── */
+  .capture-title{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:var(--navy);margin-bottom:0.35rem}
+  .capture-title span{color:var(--gold)}
+  .capture-sub{font-size:15px;color:var(--navy-text-dim);line-height:1.65;margin-bottom:1.75rem}
   .field{margin-bottom:14px}
-  .field label{display:block;font-size:12px;font-weight:700;color:var(--navy);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
-  .field input{width:100%;padding:14px 17px;background:var(--navy-dim);border:1.5px solid var(--navy-border);border-radius:var(--radius-sm);color:var(--navy);font-family:'DM Sans',sans-serif;font-size:16.5px;transition:border-color 0.2s;outline:none}
+  .field label{display:block;font-size:11px;font-weight:700;color:var(--navy);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px}
+  .field input{width:100%;padding:14px 17px;background:var(--white);border:1.5px solid var(--navy-border);border-radius:var(--radius-sm);color:var(--navy);font-family:'DM Sans',sans-serif;font-size:16px;transition:border-color 0.2s;outline:none}
   .field input:focus{border-color:var(--gold)}
-  .field input::placeholder{color:rgba(26,26,46,0.3)}
-  .btn-primary{width:100%;padding:15px 24px;background:var(--navy);border:none;border-radius:var(--radius-sm);color:var(--gold);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1.5rem}
-  .btn-primary:hover{background:#252542;transform:translateY(-1px);box-shadow:0 8px 24px rgba(26,26,46,0.25)}
+  .field input::placeholder{color:rgba(26,26,46,0.28)}
+
+  /* ── Buttons ── */
+  .btn-primary{width:100%;padding:16px 24px;background:var(--gold);border:none;border-radius:var(--radius-sm);color:var(--navy);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.02em;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1.5rem}
+  .btn-primary:hover{background:#D4B35A;transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.3)}
   .btn-primary:disabled{opacity:0.35;cursor:not-allowed;transform:none;box-shadow:none}
-  .btn-ghost{background:transparent;border:1.5px solid var(--gold-border);color:var(--navy-text-dim);border-radius:var(--radius-sm);padding:13px 24px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;width:100%;margin-top:10px}
-  .btn-ghost:hover{border-color:var(--gold);color:var(--navy);background:var(--gold-dim)}
-  .report-header{display:flex;align-items:center;gap:14px;margin-bottom:1.75rem;padding-bottom:1.5rem;border-bottom:1px solid var(--navy-border)}
-  .pattern-badge{padding:6px 14px;background:var(--navy);border:1px solid var(--navy);border-radius:20px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap}
-  .report-name{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;color:var(--navy)}
-  .report-body{font-size:15.5px;color:var(--navy-text-dim);line-height:1.85;white-space:pre-wrap}
-  .report-body strong{color:var(--navy);font-weight:700}
-  .footer{margin-top:1.5rem;text-align:center;font-size:12px;color:rgba(26,26,46,0.35)}
-  .footer a{color:var(--gold);text-decoration:none;opacity:0.9;font-weight:600}
+  .btn-ghost{background:transparent;border:1.5px solid var(--navy-border);color:var(--navy-text-dim);border-radius:var(--radius-sm);padding:14px 24px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;width:100%;margin-top:10px}
+  .btn-ghost:hover{border-color:var(--gold-border);color:var(--navy);background:var(--gold-dim)}
+
+  /* ── Report: Priority card ── */
+  .priority-card{background:var(--navy);border-radius:var(--radius);padding:24px;margin-bottom:1.5rem}
+  .priority-label{font-family:'Sora',sans-serif;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px}
+  .priority-text{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;color:var(--white);line-height:1.4}
+  .priority-sub{font-size:13.5px;color:rgba(245,240,232,0.6);line-height:1.6;margin-top:8px}
+
+  /* ── Report: Task cards ── */
+  .task-section-title{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin:1.5rem 0 0.75rem;display:flex;align-items:center;gap:8px}
+  .task-section-title::after{content:'';flex:1;height:1px;background:var(--gold-border)}
+  .task-card{background:var(--white);border:1.5px solid var(--navy-border);border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:10px;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;cursor:pointer}
+  .task-card:hover{border-color:var(--gold-border);background:var(--gold-dim)}
+  .task-card.checked{border-color:var(--green-border);background:var(--green-dim)}
+  .task-check{width:24px;height:24px;border-radius:6px;flex-shrink:0;border:2px solid var(--navy-border);display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-top:1px}
+  .task-card.checked .task-check{background:var(--green);border-color:var(--green)}
+  .task-card.checked .task-check::after{content:'✓';color:white;font-size:13px;font-weight:700}
+  .task-content{flex:1;font-size:15px;color:var(--navy-text-dim);line-height:1.6}
+  .task-content strong{color:var(--navy);font-weight:600}
+  .task-card.checked .task-content{text-decoration:line-through;opacity:0.5}
+  .task-time{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:12px;padding:3px 10px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+
+  /* ── Report: Action card ── */
+  .action-card{background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(201,168,76,0.02));border:1.5px solid var(--gold-border);border-radius:var(--radius);padding:20px;margin-top:1.25rem}
+  .action-label{font-family:'Sora',sans-serif;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px}
+  .action-text{font-size:15px;color:var(--navy);line-height:1.7}
+
+  /* ── Report: Signature ── */
+  .report-signature{margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--navy-border);font-size:14px;color:var(--navy-text-dim);line-height:1.8}
+  .report-signature strong{color:var(--navy);display:block;font-size:15px}
+  .report-signature span{font-size:12px;color:rgba(26,26,46,0.4)}
+
+  /* ── Report CTA ── */
+  .report-cta{background:var(--navy);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-top:1.75rem}
+  .report-intro{font-size:14px;color:var(--navy-text-dim);line-height:1.7;margin-bottom:1.5rem}
+
+  .footer{margin-top:1.25rem;text-align:center;font-size:11px;color:rgba(26,26,46,0.3)}
+  .footer a{color:var(--gold);text-decoration:none;font-weight:600}
   .error-msg{font-size:12px;color:#C0392B;margin-top:8px;display:none}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .perfil-intro{font-size:14px;color:var(--navy-text-dim);line-height:1.6;margin-bottom:1.5rem;padding:14px 16px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm)}
-  @media(max-width:480px){.card{padding:1.75rem 1.25rem}.info-grid{grid-template-columns:1fr}}
+  @media(max-width:480px){.card{padding:1.75rem 1.25rem}.feature-row{flex-direction:column}}
 </style>
 </head>
 <body>
-<div class="bg-orb bg-orb-1"></div>
-<div class="bg-orb bg-orb-2"></div>
+<div class="bg-accent"></div>
+<div class="bg-accent-2"></div>
 <div class="app">
 <div class="card">
 
@@ -87,24 +129,19 @@
 
   <!-- WELCOME -->
   <div class="screen active" id="screen-welcome">
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem">
-      <img src="https://raw.githubusercontent.com/Camiloperezgarcia/semana-de-accion/main/camilo-intro.jpg?v=2" alt="Camilo Pérez García" style="width:90px;height:90px;border-radius:50%;object-fit:cover;object-position:center 25%;border:2px solid var(--gold-border);flex-shrink:0">
-      <div>
-        <div style="font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px">Camilo Pérez García</div>
-        <div style="font-size:12px;color:var(--navy-text-dim)">Mentor de Emprendedores Digitales</div>
-      </div>
+    <div class="welcome-badge">
+      <img src="https://raw.githubusercontent.com/Camiloperezgarcia/semana-de-accion/main/camilo-intro.jpg?v=2" alt="Camilo">
+      <span><strong>Camilo Pérez García</strong> · Mentor de Emprendedores</span>
     </div>
-    <h1 style="margin-bottom:1.25rem">Mi Semana de <em>Acción</em></h1>
-    <div style="background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:1.5rem">
-      <p style="margin:0 0 10px;font-size:14px;color:var(--navy-text-dim);line-height:1.75">Te despiertas un lunes sin saber por dónde empezar. No te falta información, te falta una ruta concreta para esta semana específica.</p>
-      <p style="margin:0 0 10px;font-size:14px;color:var(--navy-text-dim);line-height:1.75">Responde 4 preguntas rápidas y vas a recibir tu <strong style="color:var(--navy)">checklist personalizado de la semana</strong>: qué hacer, en qué orden y con tu prioridad #1 bien clara.</p>
-      <p style="margin:0;font-size:14px;color:var(--navy-text-dim);line-height:1.75;font-style:italic">Sin relleno. Solo lo que de verdad necesitas hacer esta semana.</p>
+    <div class="welcome-hero">
+      <h1>Mi Semana de<em>Acción</em></h1>
     </div>
-    <div class="info-grid" style="margin-bottom:1.5rem">
-      <div class="info-item"><span class="info-icon">⚡</span><div class="info-text"><strong>4 preguntas</strong>menos de 2 minutos</div></div>
-      <div class="info-item"><span class="info-icon">✅</span><div class="info-text"><strong>Checklist personalizado</strong>según tu momento real</div></div>
-      <div class="info-item"><span class="info-icon">🎯</span><div class="info-text"><strong>Una sola prioridad</strong>clara, no una lista interminable</div></div>
-      <div class="info-item"><span class="info-icon">📧</span><div class="info-text"><strong>Llega a tu email</strong>para que lo tengas siempre</div></div>
+    <p class="welcome-desc">Te despiertas un lunes sin saber por dónde empezar. No te falta información, te falta <strong>una ruta concreta para esta semana</strong>.<br><br>Responde 4 preguntas y recibe tu checklist personalizado: qué hacer, en qué orden y con tu prioridad #1 bien clara.</p>
+    <div class="feature-row">
+      <div class="feature-chip"><span class="icon">⚡</span><strong>4 preguntas</strong></div>
+      <div class="feature-chip"><span class="icon">✅</span><strong>Checklist a tu medida</strong></div>
+      <div class="feature-chip"><span class="icon">🎯</span><strong>1 prioridad clara</strong></div>
+      <div class="feature-chip"><span class="icon">📧</span><strong>Llega a tu email</strong></div>
     </div>
     <button class="btn-primary" onclick="startQuiz()">Armar mi semana <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="footer">Por <a href="https://instagram.com/camiloperezgarcia" target="_blank">@camiloperezgarcia</a></div>
@@ -116,69 +153,73 @@
     <div class="q-text" id="qText"></div>
     <div id="qOptions"></div>
     <div style="display:flex;gap:10px;margin-top:1.5rem">
-      <button id="btnBack" onclick="prevQuestion()" style="background:transparent;border:1.5px solid var(--navy-border);border-radius:8px;color:rgba(26,26,46,0.4);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;padding:15px 18px;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.borderColor='var(--gold-border)';this.style.color='var(--navy)'" onmouseout="this.style.borderColor='var(--navy-border)';this.style.color='rgba(26,26,46,0.4)'">← Volver</button>
-      <button class="btn-primary" id="btnNext" onclick="nextQuestion()" disabled style="margin-top:0;flex:1">Siguiente <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button id="btnBack" onclick="prevQuestion()" style="background:transparent;border:1.5px solid var(--navy-border);border-radius:10px;color:rgba(26,26,46,0.35);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;padding:16px 18px;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.borderColor='var(--gold-border)';this.style.color='var(--navy)'" onmouseout="this.style.borderColor='var(--navy-border)';this.style.color='rgba(26,26,46,0.35)'">← Atrás</button>
+      <button class="btn-primary" id="btnNext" onclick="nextQuestion()" disabled style="margin-top:0;flex:1">Siguiente →</button>
     </div>
   </div>
 
   <!-- EMAIL -->
   <div class="screen" id="screen-email">
-    <div class="capture-title">Tu checklist está listo ✦</div>
-    <p class="capture-sub">Ingresa tu nombre y correo para ver tu plan de acción de la semana, con tu prioridad #1 y el checklist hecho a tu medida.</p>
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="width:56px;height:56px;background:var(--gold-dim);border:1.5px solid var(--gold-border);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px">✦</div>
+      <div class="capture-title">Tu checklist está <span>listo</span></div>
+      <p class="capture-sub">Ingresa tu nombre y correo para ver tu plan de acción personalizado.</p>
+    </div>
     <div class="field"><label>Tu nombre</label><input type="text" id="inputName" placeholder="¿Cómo te llamas?" autocomplete="given-name"></div>
     <div class="field"><label>Tu email</label><input type="email" id="inputEmail" placeholder="tu@email.com" autocomplete="email"></div>
     <p class="error-msg" id="emailError">Por favor ingresa un nombre y email válido.</p>
-    <button class="btn-primary" id="btnReport" onclick="generateReport()">Ver mi semana de acción <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="btn-primary" id="btnReport" onclick="generateReport()">Ver mi semana de acción →</button>
     <div class="footer" style="margin-top:1rem">Tu información es privada. No compartimos datos con terceros.</div>
   </div>
 
   <!-- LOADING -->
-  <div class="screen" id="screen-loading" style="text-align:center;padding:2rem 0">
-    <div style="width:56px;height:56px;border:3px solid var(--navy-border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem"></div>
-    <div style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem">Armando tu semana <span id="loadingName" style="color:var(--gold)"></span>...</div>
-    <div style="font-size:13px;color:var(--navy-text-dim)">Estamos generando tu checklist personalizado.<br>Esto toma unos segundos.</div>
+  <div class="screen" id="screen-loading" style="text-align:center;padding:2.5rem 0">
+    <div style="width:52px;height:52px;border:3px solid var(--navy-border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem"></div>
+    <div style="font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem">Armando tu semana<span style="color:var(--gold)" id="loadingName"></span></div>
+    <div style="font-size:13px;color:var(--navy-text-dim)">Generando tu checklist personalizado...</div>
   </div>
 
   <!-- REPORT -->
   <div class="screen" id="screen-report">
-    <div class="report-header">
-      <div>
-        <div class="pattern-badge" id="reportBadge">Tu semana de acción</div>
-        <div class="report-name" id="reportName" style="margin-top:6px"></div>
+    <div id="reportIntro" class="report-intro"></div>
+    <div id="reportPriority" class="priority-card">
+      <div class="priority-label">Tu prioridad #1 esta semana</div>
+      <div class="priority-text" id="priorityText"></div>
+      <div class="priority-sub" id="prioritySub"></div>
+    </div>
+    <div id="reportTasks"></div>
+    <div id="reportAction" class="action-card" style="display:none">
+      <div class="action-label">Tu acción #1 para hoy</div>
+      <div class="action-text" id="actionText"></div>
+    </div>
+    <div id="reportSignature" class="report-signature"></div>
+
+    <div class="report-cta">
+      <div style="font-size:2.5rem;margin-bottom:8px">🎯</div>
+      <p style="font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:800;color:#FFFFFF;margin:0 0 4px">Tu semana ya tiene ruta</p>
+      <p style="font-size:13px;color:rgba(245,240,232,0.55);margin:0 0 20px;line-height:1.6">Revisa tu correo para tener el checklist siempre a la mano.</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase">Tu progreso</span>
+        <span style="font-size:10px;font-weight:700;color:var(--gold)">50%</span>
+      </div>
+      <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:14px">
+        <div style="width:50%;height:100%;background:var(--gold);border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:10px;padding:12px 8px;text-align:center">
+          <div style="font-size:15px;margin-bottom:3px">✅</div>
+          <div style="font-size:10px;font-weight:700;color:var(--gold)">Paso 1</div>
+          <div style="font-size:9px;color:rgba(245,240,232,0.45);margin-top:2px">Checklist generado</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 8px;text-align:center">
+          <div style="font-size:15px;margin-bottom:3px">📩</div>
+          <div style="font-size:10px;font-weight:600;color:rgba(245,240,232,0.5)">Paso 2</div>
+          <div style="font-size:9px;color:rgba(245,240,232,0.3);margin-top:2px">Revisa tu correo</div>
+        </div>
       </div>
     </div>
-    <div class="report-body" id="reportBody"></div>
-    <div class="report-cta" style="background:var(--navy);border:1px solid var(--navy);border-radius:14px;padding:28px 24px;text-align:center;margin-top:2rem">
-      <div style="font-size:2.8rem;margin-bottom:10px">🎉</div>
-      <p style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;color:#FFFFFF;margin:0 0 6px">¡Listo! Tu semana ya tiene ruta</p>
-      <p style="font-size:13px;color:rgba(245,240,232,0.65);margin:0 0 20px;line-height:1.6">Tu checklist está armado. Ahora falta un paso para tenerlo siempre a la mano.</p>
-      <div style="margin:0 0 20px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:0.08em;text-transform:uppercase">Tu progreso</span>
-          <span style="font-size:11px;font-weight:700;color:#C9A84C">50%</span>
-        </div>
-        <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden">
-          <div style="width:50%;height:100%;background:linear-gradient(90deg,#C9A84C,#E8C76C);border-radius:3px"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:10px;gap:8px">
-          <div style="flex:1;background:rgba(201,168,76,0.18);border:1px solid rgba(201,168,76,0.5);border-radius:8px;padding:10px 8px;text-align:center">
-            <div style="font-size:16px;margin-bottom:4px">✅</div>
-            <div style="font-size:11px;font-weight:700;color:#C9A84C">Paso 1</div>
-            <div style="font-size:10px;color:rgba(245,240,232,0.55);margin-top:2px">Checklist generado</div>
-          </div>
-          <div style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:10px 8px;text-align:center">
-            <div style="font-size:16px;margin-bottom:4px">✉️</div>
-            <div style="font-size:11px;font-weight:600;color:rgba(245,240,232,0.55)">Paso 2</div>
-            <div style="font-size:10px;color:rgba(245,240,232,0.35);margin-top:2px">Ver tu checklist en el correo</div>
-          </div>
-        </div>
-      </div>
-      <div style="background:#F5F0E8;border:1px solid rgba(201,168,76,0.6);border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:center;gap:10px">
-        <span style="font-size:1.3rem">📩</span>
-        <span style="font-size:14px;font-weight:700;color:#1A1A2E;letter-spacing:0.02em">Ve a tu correo y completa el Paso 2</span>
-      </div>
-    </div>
-    <button class="btn-ghost" id="btnPDF" onclick="downloadPDF()" style="border-color:var(--gold);color:var(--navy);font-weight:700">↓ Descargar mi checklist en PDF</button>
+
+    <button class="btn-ghost" id="btnPDF" onclick="downloadPDF()" style="margin-top:12px;border-color:var(--gold-border);color:var(--navy);font-weight:600">↓ Descargar checklist en PDF</button>
     <div class="footer">© Camilo Pérez García · <a href="https://instagram.com/camiloperezgarcia" target="_blank">@camiloperezgarcia</a></div>
   </div>
 
@@ -186,66 +227,41 @@
 </div>
 
 <script>
-const momentoTextos = {
-  A: 'Está empezando, todavía no tiene claridad total de su oferta o mensaje',
-  B: 'Ya tiene claridad de qué hace, pero le falta consistencia para ejecutar cada semana',
-  C: 'Ya vende, pero siente que no escala, todo depende de él/ella'
-};
-const tipoTextos = {
-  A: 'Mentor, monetiza su conocimiento y experiencia',
-  B: 'Prestador de servicios, agencia, diseño, copy, embudos, trafficker, closer, etc.',
-  C: 'Creador de contenido / Influencer, construye audiencia y monetiza con marca, afiliación o producto propio'
-};
-const horasTextos = {
-  A: 'Menos de 5 horas esta semana',
-  B: 'Entre 5 y 15 horas esta semana',
-  C: 'Más de 15 horas esta semana'
-};
-const cuelloTextos = {
-  A: 'Contenido y comunidad, no está publicando o nadie interactúa',
-  B: 'Producto o servicio, no tiene claro qué está ofreciendo o necesita mejorarlo',
-  C: 'Ventas, tiene audiencia o producto, pero no está cerrando ventas'
-};
-
 const questions = [
   {
-    id:1,
-    key:'momento',
+    id:1, key:'momento',
     text:'¿En qué momento estás con tu negocio hoy?',
     options:[
-      {letter:'A',text:'Estoy empezando, todavía no tengo claridad total de mi oferta o mi mensaje',value:'A'},
-      {letter:'B',text:'Ya tengo claridad de qué hago, pero me falta consistencia para ejecutar cada semana',value:'B'},
-      {letter:'C',text:'Ya vendo, pero siento que no escala, todo depende de mí',value:'C'}
+      {num:'1',text:'Estoy empezando, todavía no tengo claridad total de mi oferta o mi mensaje',value:'A'},
+      {num:'2',text:'Ya tengo claridad de qué hago, pero me falta consistencia para ejecutar cada semana',value:'B'},
+      {num:'3',text:'Ya vendo, pero siento que no escala, todo depende de mí',value:'C'}
     ]
   },
   {
-    id:2,
-    key:'tipo_emprendedor',
+    id:2, key:'tipo_emprendedor',
     text:'¿Cuál describe mejor lo que haces o quieres hacer?',
     options:[
-      {letter:'A',text:'Mentor, monetizo mi conocimiento y experiencia',value:'A'},
-      {letter:'B',text:'Prestador de servicios, agencia, diseño, copy, embudos, trafficker, closer, etc.',value:'B'},
-      {letter:'C',text:'Creador de contenido / Influencer, construyo audiencia y monetizo con marca, afiliación o producto propio',value:'C'}
+      {num:'1',text:'Mentor, monetizo mi conocimiento y experiencia',value:'A'},
+      {num:'2',text:'Prestador de servicios, agencia, diseño, copy, embudos, trafficker, closer, etc.',value:'B'},
+      {num:'3',text:'Creador de contenido / Influencer, construyo audiencia y monetizo con marca, afiliación o producto propio',value:'C'}
     ]
   },
   {
-    id:3,
-    key:'horas_disponibles',
+    id:3, key:'horas_disponibles',
     text:'¿Cuántas horas reales puedes dedicarle a tu negocio esta semana?',
     options:[
-      {letter:'A',text:'Menos de 5 horas, tengo otras responsabilidades fuertes esta semana',value:'A'},
-      {letter:'B',text:'Entre 5 y 15 horas, tengo tiempo parcial dedicado',value:'B'},
-      {letter:'C',text:'Más de 15 horas, el negocio es mi prioridad principal esta semana',value:'C'}
+      {num:'1',text:'Menos de 5 horas, tengo otras responsabilidades fuertes esta semana',value:'A'},
+      {num:'2',text:'Entre 5 y 15 horas, tengo tiempo parcial dedicado',value:'B'},
+      {num:'3',text:'Más de 15 horas, el negocio es mi prioridad principal esta semana',value:'C'}
     ]
   },
   {
-    id:4,
-    key:'cuello_botella',
+    id:4, key:'cuello_botella',
     text:'¿Qué es lo que más se te está atascando ahora mismo?',
     options:[
-      {letter:'A',text:'Contenido y comunidad, no estoy publicando o nadie interactúa',value:'A'},
-      {letter:'B',text:'Producto o servicio, no tengo claro qué estoy ofreciendo o necesito mejorarlo',value:'B'},
-      {letter:'C',text:'Ventas, tengo audiencia o producto, pero no estoy cerrando ventas',value:'C'}
+      {num:'1',text:'Contenido y comunidad, no estoy publicando o nadie interactúa',value:'A'},
+      {num:'2',text:'Producto o servicio, no tengo claro qué estoy ofreciendo o necesito mejorarlo',value:'B'},
+      {num:'3',text:'Ventas, tengo audiencia o producto, pero no estoy cerrando ventas',value:'C'}
     ]
   }
 ];
@@ -253,7 +269,7 @@ const questions = [
 let currentQ=0,selectedAnswer=null;
 let respuestas={momento:null,tipo_emprendedor:null,horas_disponibles:null,cuello_botella:null};
 let answersHistory=[];
-const TOTAL_PREGUNTAS = 4;
+const TOTAL_PREGUNTAS=4;
 
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -268,9 +284,8 @@ function startQuiz(){
 }
 
 function updateProgress(idx){
-  const preguntaActual = idx + 1;
-  const pct=Math.round((preguntaActual/TOTAL_PREGUNTAS)*100);
-  document.getElementById('progressText').textContent='Pregunta '+preguntaActual+' de '+TOTAL_PREGUNTAS;
+  const pct=Math.round(((idx+1)/TOTAL_PREGUNTAS)*100);
+  document.getElementById('progressText').textContent='Pregunta '+(idx+1)+' de '+TOTAL_PREGUNTAS;
   document.getElementById('progressPct').textContent=pct+'%';
   document.getElementById('progressFill').style.width=pct+'%';
 }
@@ -278,22 +293,19 @@ function updateProgress(idx){
 function renderQuestion(idx){
   const q=questions[idx];currentQ=idx;selectedAnswer=null;
   document.getElementById('btnNext').disabled=true;
-  const preguntaActual = idx + 1;
-  document.getElementById('qNumber').textContent='Pregunta '+preguntaActual+' de '+TOTAL_PREGUNTAS;
+  document.getElementById('qNumber').textContent='Pregunta '+(idx+1)+' de '+TOTAL_PREGUNTAS;
   document.getElementById('qText').textContent=q.text;
   updateProgress(idx);
   const container=document.getElementById('qOptions');
   const newContainer=container.cloneNode(false);
   container.parentNode.replaceChild(newContainer,container);
   const qOptions=document.getElementById('qOptions');
-
   const list=document.createElement('div');
   list.className='options-list';
   q.options.forEach((opt,i)=>{
     const btn=document.createElement('button');
-    btn.className='option-btn';
-    btn.type='button';
-    btn.innerHTML=`<span class="option-letter">${opt.letter}</span><span>${opt.text}</span>`;
+    btn.className='option-btn';btn.type='button';
+    btn.innerHTML=`<span class="option-num">${opt.num}</span><span>${opt.text}</span>`;
     btn.addEventListener('click',function(){
       list.querySelectorAll('.option-btn').forEach((b,j)=>b.classList.toggle('selected',j===i));
       selectedAnswer={key:q.key,value:opt.value};
@@ -302,15 +314,10 @@ function renderQuestion(idx){
     list.appendChild(btn);
   });
   qOptions.appendChild(list);
-
-  // Restaurar selección previa si existe (al volver)
   if(answersHistory[idx]){
     selectedAnswer=answersHistory[idx];
     const optIdx=q.options.findIndex(o=>o.value===answersHistory[idx].value);
-    if(optIdx>=0){
-      list.children[optIdx].classList.add('selected');
-      document.getElementById('btnNext').disabled=false;
-    }
+    if(optIdx>=0){list.children[optIdx].classList.add('selected');document.getElementById('btnNext').disabled=false;}
   }
 }
 
@@ -323,12 +330,105 @@ function nextQuestion(){
 }
 
 function prevQuestion(){
-  if(currentQ===0){
-    showScreen('welcome');
-    document.getElementById('progressWrap').style.display='none';
-    return;
-  }
+  if(currentQ===0){showScreen('welcome');document.getElementById('progressWrap').style.display='none';return}
   renderQuestion(currentQ-1);
+}
+
+function parseReport(raw) {
+  const lines = raw.split('\n');
+  let intro = '', priority = '', prioritySub = '', tasks = [], action = '', signature = '';
+  let section = 'intro';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.match(/^##\s*Tu prioridad/i)) { section = 'priority'; continue; }
+    if (line.match(/^##\s*Tu checklist/i)) { section = 'tasks'; continue; }
+    if (line.match(/^##\s*Tu acción/i)) { section = 'action'; continue; }
+    if (line.match(/Un Abrazo/i)) { signature = 'Un Abrazo!'; section = 'signature'; continue; }
+    if (section === 'signature') {
+      if (line.match(/Camilo Pérez/)) signature += '\n' + line;
+      if (line.match(/Mentor de/)) signature += '\n' + line;
+      continue;
+    }
+    if (section === 'intro') {
+      if (line.trim()) intro += (intro ? ' ' : '') + line.trim();
+    }
+    if (section === 'priority') {
+      const clean = line.trim();
+      if (clean) {
+        if (!priority) priority = clean;
+        else prioritySub += (prioritySub ? ' ' : '') + clean;
+      }
+    }
+    if (section === 'tasks') {
+      const taskMatch = line.match(/^☐\s*(.+)/);
+      if (taskMatch) {
+        let taskText = taskMatch[1];
+        const timeMatch = taskText.match(/\((\d+\s*(?:min|hora|horas|h)(?:\s*[-–]\s*\d+\s*(?:min|hora|horas|h))?)\)\s*$/i);
+        let time = '';
+        if (timeMatch) {
+          time = timeMatch[1];
+          taskText = taskText.replace(timeMatch[0], '').trim();
+        }
+        tasks.push({ text: taskText, time: time });
+      }
+    }
+    if (section === 'action') {
+      const clean = line.trim();
+      if (clean) action += (action ? ' ' : '') + clean;
+    }
+  }
+  return { intro, priority, prioritySub, tasks, action, signature };
+}
+
+function renderReport(parsed, name) {
+  // Intro
+  const introHtml = parsed.intro
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+  document.getElementById('reportIntro').innerHTML = introHtml;
+
+  // Priority
+  const prioHtml = parsed.priority
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<strong style="color:#fff">$1</strong>');
+  document.getElementById('priorityText').innerHTML = prioHtml;
+  document.getElementById('prioritySub').innerHTML = parsed.prioritySub
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:rgba(245,240,232,0.85)">$1</strong>');
+
+  // Tasks
+  const tasksContainer = document.getElementById('reportTasks');
+  tasksContainer.innerHTML = '<div class="task-section-title">Tu checklist de la semana</div>';
+  parsed.tasks.forEach((task, i) => {
+    const card = document.createElement('div');
+    card.className = 'task-card';
+    card.onclick = function() { this.classList.toggle('checked'); };
+    const taskHtml = task.text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+    card.innerHTML = `
+      <div class="task-check"></div>
+      <div class="task-content">${taskHtml}</div>
+      ${task.time ? `<div class="task-time">${task.time}</div>` : ''}
+    `;
+    tasksContainer.appendChild(card);
+  });
+
+  // Action
+  if (parsed.action) {
+    const actionCard = document.getElementById('reportAction');
+    actionCard.style.display = 'block';
+    const actionHtml = parsed.action
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+    document.getElementById('actionText').innerHTML = actionHtml;
+  }
+
+  // Signature
+  if (parsed.signature) {
+    document.getElementById('reportSignature').innerHTML =
+      'Un Abrazo!<br><br><strong>Camilo Pérez</strong><span>Mentor de Emprendedores en Negocios Digitales</span>';
+  }
 }
 
 async function generateReport(){
@@ -339,65 +439,61 @@ async function generateReport(){
   emailErr.style.display='none';
   const btn=document.getElementById('btnReport');
   btn.disabled=true;btn.textContent='Generando...';
-  document.getElementById('loadingName').textContent=name;
+  document.getElementById('loadingName').textContent=' '+name;
   showScreen('loading');
   try{
     const reportRes=await fetch('/api/report',{signal:AbortSignal.timeout(25000),method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          name,
-          momento:respuestas.momento,
-          tipo_emprendedor:respuestas.tipo_emprendedor,
-          horas_disponibles:respuestas.horas_disponibles,
-          cuello_botella:respuestas.cuello_botella
-        })});
+      body:JSON.stringify({
+        name,
+        momento:respuestas.momento,
+        tipo_emprendedor:respuestas.tipo_emprendedor,
+        horas_disponibles:respuestas.horas_disponibles,
+        cuello_botella:respuestas.cuello_botella
+      })});
     const{report}=await reportRes.json();
     fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          name,email,
-          momento_negocio:respuestas.momento,
-          tipo_emprendedor:respuestas.tipo_emprendedor,
-          horas_disponibles:respuestas.horas_disponibles,
-          cuello_botella:respuestas.cuello_botella,
-          report:report||''
-        })});
-    document.getElementById('reportBadge').textContent='Tu semana de acción';
-    document.getElementById('reportName').textContent=name;
-    const raw=report||'No pudimos generar tu checklist. Contáctanos directamente.';
-    const html=raw
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/^# (.+)$/gm,'<h2 style="font-family:\'Sora\',sans-serif;font-size:1.1rem;font-weight:700;color:#1A1A2E;margin:1.2rem 0 0.4rem">$1</h2>')
-      .replace(/^## (.+)$/gm,'<h3 style="font-family:\'Sora\',sans-serif;font-size:1rem;font-weight:700;color:#C9A84C;margin:1rem 0 0.3rem">$1</h3>')
-      .replace(/^### (.+)$/gm,'<h4 style="font-family:\'Sora\',sans-serif;font-size:.95rem;font-weight:600;color:#1A1A2E;margin:.8rem 0 .2rem">$1</h4>')
-      .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#1A1A2E;font-weight:700">$1</strong>')
-      .replace(/\*(.+?)\*/g,'<strong style="color:#1A1A2E;font-weight:700">$1</strong>')
-      .replace(/Un Abrazo! Camilo Pérez/g,'<br><br><span style="color:rgba(26,26,46,0.7);font-style:italic;line-height:2">Un Abrazo!<br><strong style="color:var(--navy);font-style:normal;font-size:15px">Camilo Pérez</strong><br><span style="font-size:12px;color:rgba(26,26,46,0.45)">Mentor de Emprendedores en Negocios Digitales</span></span>')
-      .replace(/ — /g,', ')
-      .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid rgba(201,168,76,0.3);margin:1rem 0">')
-      .replace(/\n\n/g,'</p><p style="margin:0.6rem 0">')
-      .replace(/\n/g,'<br>');
-    document.getElementById('reportBody').innerHTML='<p style="margin:0">'+html+'</p>';
+      body:JSON.stringify({
+        name,email,
+        momento_negocio:respuestas.momento,
+        tipo_emprendedor:respuestas.tipo_emprendedor,
+        horas_disponibles:respuestas.horas_disponibles,
+        cuello_botella:respuestas.cuello_botella,
+        report:report||''
+      })});
+    const parsed = parseReport(report || '');
+    renderReport(parsed, name);
+    window._rawReport = report;
+    window._userName = name;
     showScreen('report');
   }catch(err){
     console.error(err);showScreen('email');
-    btn.disabled=false;btn.textContent='Ver mi semana de acción';
+    btn.disabled=false;btn.textContent='Ver mi semana de acción →';
     emailErr.textContent='Hubo un error. Intenta de nuevo.';emailErr.style.display='block';
   }
 }
 
-function downloadPDF() {
-  var nombre = document.getElementById('reportName').textContent;
-  var body = document.getElementById('reportBody').innerHTML;
-  var win = window.open('','_blank');
-  var css = '<style>* {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box} html,body{margin:0;padding:0;background:#F5F0E8!important;color:#1A1A2E!important;font-family:Archivo,sans-serif} .page{background:#F5F0E8!important;padding:40px 48px} .top-bar{height:4px;background:linear-gradient(90deg,#1A1A2E,#C9A84C,#1A1A2E);margin-bottom:32px;border-radius:2px} .header{display:flex;align-items:flex-start;gap:16px;padding-bottom:24px;border-bottom:2px solid #C9A84C;margin-bottom:28px} .logo-hex{width:48px;height:48px;background:rgba(26,26,46,0.08);border:1px solid rgba(26,26,46,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0} .header-text{flex:1} .badge{display:inline-block;background:#1A1A2E!important;border:1px solid rgba(201,168,76,0.6);color:#C9A84C!important;font-family:Sora,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:8px} .patron-name{font-family:Sora,sans-serif;font-size:1.5rem;font-weight:800;color:#1A1A2E!important;margin:0;line-height:1.2} .handle{font-family:Sora,sans-serif;font-size:11px;color:rgba(201,168,76,0.9)!important;margin-top:4px} .report-content{font-size:14px;line-height:1.85;color:#2D2D4A!important} .report-content p{margin:0.6rem 0} .report-content h2{font-family:Sora,sans-serif;font-size:1.05rem;font-weight:700;color:#1A1A2E!important;margin:1.5rem 0 0.4rem} .report-content h3{font-family:Sora,sans-serif;font-size:0.95rem;font-weight:700;color:#C9A84C!important;margin:1.2rem 0 0.3rem} .report-content strong{color:#1A1A2E!important;font-weight:700} .report-content hr{border:none;border-top:1px solid rgba(201,168,76,0.3);margin:1.2rem 0} .cta-box{margin-top:2.5rem;padding:20px 24px;background:#1A1A2E!important;border:1px solid rgba(201,168,76,0.3);border-radius:10px;text-align:center} .cta-box p{font-size:12px;color:rgba(245,240,232,0.7)!important;margin:0 0 6px;line-height:1.5} .cta-keyword{font-family:Sora,sans-serif;font-size:17px;font-weight:800;color:#C9A84C!important;display:block;margin:6px 0} .footer-pdf{margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(26,26,46,0.15);font-size:11px;color:rgba(26,26,46,0.35)!important;text-align:center} @media print{.page{padding:24px 32px}}</style>';
-  var fonts = '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">';
-  var html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Mi Semana de Acción</title>' + fonts + css + '</head><body>';
-  html += '<div class="page">';
-  html += '<div class="top-bar"></div>';
-  html += '<div class="header"><div class="logo-hex"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 3L25 9V19L14 25L3 19V9L14 3Z" stroke="#C9A84C" stroke-width="1.5"/><circle cx="14" cy="14" r="4" fill="#C9A84C" opacity="0.8"/></svg></div>';
-  html += '<div class="header-text"><div class="badge">Tu semana de acción</div><div class="patron-name">' + nombre + '</div><div class="handle">@camiloperezgarcia</div></div></div>';
-  html += '<div class="report-content">' + body + '</div>';
-  html += '<div class="footer-pdf">© Camilo Pérez García · @camiloperezgarcia</div>';
-  html += '</div><script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>';
+function downloadPDF(){
+  var nombre=window._userName||'';
+  var report=window._rawReport||'';
+  var win=window.open('','_blank');
+  var reportHtml=report
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^## (.+)$/gm,'<h3 style="font-family:Sora,sans-serif;font-size:14px;font-weight:700;color:#C9A84C;margin:20px 0 8px;letter-spacing:0.05em;text-transform:uppercase">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#1A1A2E">$1</strong>')
+    .replace(/\*(.+?)\*/g,'<strong style="color:#1A1A2E">$1</strong>')
+    .replace(/☐\s*(.+)/g,'<div style="display:flex;align-items:flex-start;gap:10px;margin:8px 0;padding:12px 14px;border:1px solid rgba(26,26,46,0.1);border-radius:8px;background:rgba(245,240,232,0.5)"><span style="width:18px;height:18px;border:2px solid rgba(26,26,46,0.2);border-radius:4px;flex-shrink:0;margin-top:1px"></span><span style="font-size:13.5px;line-height:1.6;color:#2D2D4A">$1</span></div>')
+    .replace(/Un Abrazo!\n\nCamilo Pérez\nMentor de Emprendedores en Negocios Digitales/g,'<p style="margin:28px 0 0;font-size:14px;color:#1A1A2E;line-height:1.8">Un Abrazo!<br><br><strong>Camilo Pérez</strong><br><span style="font-size:12px;color:#888">Mentor de Emprendedores en Negocios Digitales</span></p>')
+    .replace(/\n\n/g,'</p><p style="margin:8px 0;line-height:1.7;color:#2D2D4A;font-size:14px">')
+    .replace(/\n/g,'<br>');
+  var css='<style>*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box}html,body{margin:0;padding:0;background:#F5F0E8!important;color:#1A1A2E!important;font-family:Archivo,sans-serif}.page{background:#F5F0E8!important;padding:40px 48px}.top-bar{height:3px;background:linear-gradient(90deg,#C9A84C,#1A1A2E,#C9A84C);margin-bottom:28px;border-radius:2px}.header{padding-bottom:20px;border-bottom:2px solid #C9A84C;margin-bottom:24px}.badge{display:inline-block;background:#C9A84C!important;color:#1A1A2E!important;font-family:Sora,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:10px}.name{font-family:Sora,sans-serif;font-size:1.4rem;font-weight:800;color:#1A1A2E!important;margin:0;line-height:1.2}.handle{font-size:11px;color:#C9A84C!important;margin-top:4px}.content{font-size:14px;line-height:1.8;color:#2D2D4A!important}.content p{margin:8px 0}.content h3{font-family:Sora,sans-serif}.content strong{color:#1A1A2E!important}.footer-pdf{margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(26,26,46,0.15);font-size:11px;color:rgba(26,26,46,0.35)!important;text-align:center}@media print{.page{padding:24px 32px}}</style>';
+  var fonts='<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">';
+  var html='<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Mi Semana de Acción</title>'+fonts+css+'</head><body>';
+  html+='<div class="page">';
+  html+='<div class="top-bar"></div>';
+  html+='<div class="header"><div class="badge">Tu semana de acción</div><div class="name">'+nombre+'</div><div class="handle">@camiloperezgarcia</div></div>';
+  html+='<div class="content"><p>'+reportHtml+'</p></div>';
+  html+='<div class="footer-pdf">© Camilo Pérez García · @camiloperezgarcia</div>';
+  html+='</div><script>window.onload=function(){setTimeout(function(){window.print();},800)}<\/script></body></html>';
   win.document.write(html);
   win.document.close();
 }
