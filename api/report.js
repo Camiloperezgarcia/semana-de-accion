@@ -1,65 +1,110 @@
 export const maxDuration = 30;
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, primary, secondary, perfil, primerPaso } = req.body;
+  const { name, momento, tipo_emprendedor, horas_disponibles, cuello_botella } = req.body;
 
-  if (!name || !primary) {
+  if (!name || !momento || !tipo_emprendedor || !horas_disponibles || !cuello_botella) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const patternNames = {
-    demostrador:   'El Demostrador',
-    fugitivo:      'El Fugitivo',
-    urgente:       'El Urgente',
-    buscador:      'El Buscador de Reconocimiento',
-    perfeccionista:'El Perfeccionista Paralizado',
-    seguidor:      'El Seguidor de Tendencias',
-    salvador:      'El Salvador',
-    impostor:      'El Impostor Silencioso'
+  // ── Textos legibles para cada respuesta ──
+  const momentoTextos = {
+    A: 'Está empezando, todavía no tiene claridad total de su oferta o mensaje',
+    B: 'Ya tiene claridad de qué hace, pero le falta consistencia para ejecutar cada semana',
+    C: 'Ya vende, pero siente que no escala, todo depende de él/ella'
   };
 
-  const primName = patternNames[primary] || primary;
-  const secName  = secondary ? patternNames[secondary] : null;
+  const tipoTextos = {
+    A: 'Mentor — monetiza su conocimiento y experiencia',
+    B: 'Prestador de servicios — agencia, diseño, copy, embudos, trafficker, closer, etc.',
+    C: 'Creador de contenido / Influencer — construye audiencia y monetiza con marca, afiliación o producto propio'
+  };
 
-  const primerPasoTexto = primerPaso || 'Dedica 30 minutos esta semana a escribir con honestidad desde qué motivación real estás construyendo tu negocio. No la versión pública — la versión verdadera. Ese ejercicio es el inicio del trabajo de resignificación.';
+  const horasTextos = {
+    A: 'Menos de 5 horas esta semana',
+    B: 'Entre 5 y 15 horas esta semana',
+    C: 'Más de 15 horas esta semana'
+  };
 
-  const prompt = `Eres Camilo Pérez García, mentor de emprendedores en negocios digitales con sede en Cali, Colombia. Tu tono es cercano, honesto, directo pero humano — como hablarle a un estudiante de confianza. Sin corporativo, sin hype, sin promesas vacías.
+  const cuelloTextos = {
+    A: 'Contenido y comunidad — no está publicando o nadie interactúa',
+    B: 'Producto o servicio — no tiene claro qué está ofreciendo o necesita mejorarlo',
+    C: 'Ventas — tiene audiencia o producto, pero no está cerrando ventas'
+  };
 
-Genera un reporte personalizado de diagnóstico de identidad para ${name}.
+  // ── Tabla de prioridad pre-calculada: momento × cuello_botella ──
+  const prioridadTabla = {
+    'A-A': { prioridad: 'Definir tu mensaje y empezar a publicar', foco: 'Claridad de mensaje + primeras publicaciones' },
+    'A-B': { prioridad: 'Definir tu oferta mínima viable', foco: 'Estructurar qué ofreces, a quién y a qué precio' },
+    'A-C': { prioridad: 'Primero construye la base antes de vender', foco: 'Mensaje claro + oferta definida antes de pensar en ventas' },
+    'B-A': { prioridad: 'Crear un sistema de contenido semanal sostenible', foco: 'Rutina de publicación consistente + interacción con tu comunidad' },
+    'B-B': { prioridad: 'Pulir tu oferta para que sea clara y vendible', foco: 'Ajustar tu servicio o producto para que el mercado lo entienda rápido' },
+    'B-C': { prioridad: 'Activar tu proceso de ventas', foco: 'Convertir tu audiencia existente en clientes con un proceso claro' },
+    'C-A': { prioridad: 'Sistematizar tu contenido para que no dependa de ti', foco: 'Delegar o automatizar contenido para liberar tu tiempo' },
+    'C-B': { prioridad: 'Estandarizar y escalar tu servicio', foco: 'Documentar procesos y crear paquetes replicables' },
+    'C-C': { prioridad: 'Optimizar tu embudo de ventas', foco: 'Mejorar conversión en cada etapa del proceso de venta' }
+  };
 
-PATRÓN PREDOMINANTE: ${primName}
-${secName ? `PATRÓN SECUNDARIO: ${secName}` : 'Sin patrón secundario significativo'}
+  // ── Cantidad de tareas según horas disponibles ──
+  const alcanceTareas = {
+    A: { tareas: '3 tareas máximo', nota: 'con menos de 5 horas, cada tarea debe ser de alto impacto y ejecutable en menos de 90 minutos' },
+    B: { tareas: '5 tareas', nota: 'con 5 a 15 horas tiene espacio para avanzar en varias áreas sin saturarse' },
+    C: { tareas: '7 tareas', nota: 'con más de 15 horas puede cubrir su prioridad principal y avanzar en áreas secundarias' }
+  };
 
-El reporte debe tener entre 400 y 500 palabras. Usa exactamente esta estructura con estos títulos en markdown:
+  const claveCombo = `${momento}-${cuello_botella}`;
+  const prioridadInfo = prioridadTabla[claveCombo];
+  const alcance = alcanceTareas[horas_disponibles];
 
-1. Saludo breve y personalizado a ${name} (1-2 líneas, sin título)
+  const prompt = `Eres Camilo Pérez García, mentor de emprendedores en negocios digitales con sede en Cali, Colombia. Tu tono es cercano, honesto, directo pero humano, como hablarle a un estudiante de confianza. Sin corporativo, sin hype, sin promesas vacías.
 
-2. ## ${primName}
-   Descripción del patrón — en qué consiste, desde dónde nace (2-3 párrafos)
+Genera un checklist personalizado de la semana para ${name}.
 
-3. ## Cómo se ve en tu Emprendimiento
-   Cómo este patrón se manifiesta concretamente — consecuencias reales y visibles (1-2 párrafos)
+DATOS DEL EMPRENDEDOR:
+- Momento del negocio: ${momentoTextos[momento]}
+- Tipo de emprendedor: ${tipoTextos[tipo_emprendedor]}
+- Horas disponibles: ${horasTextos[horas_disponibles]}
+- Cuello de botella actual: ${cuelloTextos[cuello_botella]}
 
-4. ${secName ? `## TU PATRÓN SECUNDARIO: ${secName}\nCómo refuerza al predominante (1 párrafo)` : '## Una nota importante\nUna nota sobre que la mayoría tiene un patrón predominante claro como este (1 párrafo)'}
+PRIORIDAD #1 CALCULADA: ${prioridadInfo.prioridad}
+FOCO DE LA SEMANA: ${prioridadInfo.foco}
 
-5. ## 🔍 Lo que necesitas resignificar
-   El área de trabajo concreto para este patrón (1 párrafo)
+ALCANCE DEL CHECKLIST: ${alcance.tareas} (${alcance.nota})
 
-6. ## 🗓️ Tu primer paso esta semana
-   Usa exactamente este texto para el primer paso (no lo cambies, no lo resumas):
-   ${primerPasoTexto}
+El checklist debe tener entre 400 y 550 palabras. Usa exactamente esta estructura con estos títulos en markdown:
 
-IMPORTANTE:
+1. Saludo breve y personalizado a ${name} (1-2 líneas, sin título, algo como "Listo, ${name}. Tu semana ya tiene ruta.")
+
+2. ## Tu prioridad #1 esta semana
+   Explica cuál es la prioridad y por qué, conectándola con su momento y su cuello de botella. Sé específico, no genérico. (2-3 líneas)
+
+3. ## Tu checklist de la semana
+   Lista exactamente ${alcance.tareas} concretas, específicas y accionables. Cada tarea debe:
+   - Empezar con un emoji de checkbox (☐)
+   - Ser una acción concreta, no un concepto abstracto
+   - Incluir un tiempo estimado realista
+   - Estar adaptada al tipo de emprendedor (${tipoTextos[tipo_emprendedor]})
+   
+   Ejemplo de formato:
+   ☐ **Escribir 3 ideas de contenido** basadas en preguntas frecuentes de tus clientes (30 min)
+
+4. ## Tu acción #1 para hoy
+   Una sola acción que puede hacer hoy mismo, en menos de 30 minutos, que le dé impulso para arrancar la semana. Sé muy concreto.
+
+REGLAS IMPORTANTES:
 - Habla en segunda persona (tú)
-- Usa lenguaje neutro e inclusivo en todo momento: evita términos que asuman género. En lugar de "preparado/a" usa "en condiciones de", en lugar de "listo/a" usa "en el momento indicado", en lugar de "experto/a" usa "referente" o "profesional", en lugar de "cansado/a" usa "agotada la paciencia". Si necesitas adjetivar, usa formas neutras o reescribe la frase para evitar la marca de género.
-- Tono: cercano, sin juzgar, desde la experiencia, como alguien que ya recorrió este camino
-- NO incluyas el CTA al programa, eso está en otro lugar
+- Usa lenguaje neutro e inclusivo: evita términos que asuman género
+- Las tareas deben ser ESPECÍFICAS para su tipo de emprendedor y su cuello de botella, no genéricas
+- No incluyas tareas que no pueda hacer con las horas que tiene disponibles
+- Tono: cercano, práctico, como alguien que ya recorrió este camino y te dice exactamente qué hacer
 - Cuando uses palabras entre asteriscos simples como *palabra*, escríbelas entre doble asterisco **palabra** para que queden en negrilla
 - Evita usar guiones largos (—) en el texto; usa comas o punto y coma para separar ideas
-- Al final del reporte, después del primer paso, agrega exactamente este bloque de firma con los saltos de línea:
+- NO incluyas CTA al programa ni mención de "Estructura que Expande"
+- Al final del checklist, después de la acción #1, agrega exactamente este bloque de firma con los saltos de línea:
 
 Un Abrazo!
 
@@ -76,7 +121,7 @@ Mentor de Emprendedores en Negocios Digitales`;
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
+        max_tokens: 1200,
         messages: [{ role: 'user', content: prompt }]
       })
     });
