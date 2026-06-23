@@ -5,16 +5,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, patron, patronSecundario, perfil, report } = req.body;
+  const { name, email, momento_negocio, tipo_emprendedor, horas_disponibles, cuello_botella, report } = req.body;
 
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Invalid email' });
   }
 
-  const VIDEO_URL = process.env.VIDEO_URL || 'https://identidad.miimperiodigital.com/video';
-  const VIDEO_THUMBNAIL = `https://img.youtube.com/vi/luuMsBECyL8/maxresdefault.jpg`;
+  // ── Textos legibles para campos ──
+  const momentoLabel = { A: 'Empezando', B: 'Tiene claridad, falta consistencia', C: 'Vende, no escala' };
+  const tipoLabel = { A: 'Mentor', B: 'Prestador de servicios', C: 'Creador de contenido' };
+  const horasLabel = { A: 'Menos de 5 horas', B: 'Entre 5 y 15 horas', C: 'Más de 15 horas' };
+  const cuelloLabel = { A: 'Contenido y comunidad', B: 'Producto o servicio', C: 'Ventas' };
 
-  // Función para guardar en Google Sheets
+  // ── Función para guardar en Google Sheets (sin googleapis, JWT manual) ──
   async function saveToSheets(data) {
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
@@ -22,7 +25,6 @@ export default async function handler(req, res) {
 
     if (!serviceAccountEmail || !privateKey || !sheetId) return;
 
-    // Generar JWT para autenticación
     const now = Math.floor(Date.now() / 1000);
     const header = { alg: 'RS256', typ: 'JWT' };
     const payload = {
@@ -36,14 +38,12 @@ export default async function handler(req, res) {
     const base64url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');
     const signingInput = `${base64url(header)}.${base64url(payload)}`;
 
-    // Importar crypto para firmar
     const { createSign } = await import('crypto');
     const sign = createSign('RSA-SHA256');
     sign.update(signingInput);
     const signature = sign.sign(privateKey, 'base64url');
     const jwt = `${signingInput}.${signature}`;
 
-    // Obtener access token
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -53,16 +53,6 @@ export default async function handler(req, res) {
 
     if (!access_token) return;
 
-    // Mapear perfil al nombre visible
-    const perfilNombres = {
-      mentor: 'Mentor',
-      prestador: 'Prestador de Servicios',
-      creador: 'Infoproductor',
-      explorando: 'Sin Definir'
-    };
-    const perfilVisible = perfilNombres[data.perfil] || data.perfil || 'Sin Definir';
-
-    // Agregar fila a Google Sheets
     const fecha = new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' });
     await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
       method: 'POST',
@@ -71,16 +61,25 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        values: [[fecha, data.name, data.email, perfilVisible, data.patron, data.patronSecundario || '']]
+        values: [[
+          fecha,
+          data.name,
+          data.email,
+          momentoLabel[data.momento_negocio] || data.momento_negocio || '',
+          tipoLabel[data.tipo_emprendedor] || data.tipo_emprendedor || '',
+          horasLabel[data.horas_disponibles] || data.horas_disponibles || '',
+          cuelloLabel[data.cuello_botella] || data.cuello_botella || ''
+        ]]
       })
     });
   }
 
   try {
     // 1. Guardar en Google Sheets (sin bloquear el flujo)
-    saveToSheets({ name, email, perfil, patron, patronSecundario }).catch(err => console.error('Sheets error:', err));
+    saveToSheets({ name, email, momento_negocio, tipo_emprendedor, horas_disponibles, cuello_botella })
+      .catch(err => console.error('Sheets error:', err));
 
-    // 2. Registrar en MailerLite con perfil y patrón secundario
+    // 2. Registrar en MailerLite con campos personalizados
     await fetch('https://connect.mailerlite.com/api/subscribers', {
       method: 'POST',
       headers: {
@@ -91,25 +90,25 @@ export default async function handler(req, res) {
         email: email,
         fields: {
           name: name,
-          patron_identidad: patron,
-          patron_secundario: patronSecundario || '',
-          perfil_negocio: perfil || ''
+          momento_negocio: momentoLabel[momento_negocio] || momento_negocio || '',
+          tipo_emprendedor: tipoLabel[tipo_emprendedor] || tipo_emprendedor || '',
+          horas_disponibles: horasLabel[horas_disponibles] || horas_disponibles || '',
+          cuello_botella: cuelloLabel[cuello_botella] || cuello_botella || ''
         },
         groups: [process.env.MAILERLITE_GROUP_ID]
       })
     });
 
-    // 2. Enviar email transaccional via Resend
+    // 3. Enviar email con checklist via Resend
     if (report) {
       const reportHtml = report
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/^## TU PATRÓN SECUNDARIO: (.+)$/gm,
-          '<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0"><tr><td style="background:#1A1A2E;padding:16px 24px;border-radius:8px"><p style="margin:0 0 4px;font-size:10px;font-weight:700;color:#C9A84C;letter-spacing:0.15em;text-transform:uppercase;font-family:Arial,sans-serif">TU PATRÓN SECUNDARIO</p><p style="margin:0;font-size:20px;font-weight:700;color:#FFFFFF;font-family:Georgia,serif">$1</p></td></tr></table>')
-        .replace(/^# (.+)$/gm,'<h2 style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:#1A1A2E;margin:24px 0 8px;padding:0">$1</h2>')
-        .replace(/^## (.+)$/gm,'<h3 style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#C9A84C;margin:20px 0 6px;padding:0">$1</h3>')
+        .replace(/^# (.+)$/gm,'<h2 style="font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1A1A2E;margin:24px 0 8px;padding:0">$1</h2>')
+        .replace(/^## (.+)$/gm,'<h3 style="font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#C9A84C;margin:20px 0 6px;padding:0">$1</h3>')
         .replace(/^### (.+)$/gm,'<h4 style="font-size:15px;font-weight:700;color:#1A1A2E;margin:14px 0 4px;padding:0;font-family:Arial,sans-serif">$1</h4>')
         .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#1A1A2E;font-weight:700">$1</strong>')
         .replace(/\*(.+?)\*/g,'<strong style="color:#1A1A2E;font-weight:700">$1</strong>')
+        .replace(/☐/g,'&#9744;')
         .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid rgba(201,168,76,0.3);margin:16px 0">')
         .replace(/Un Abrazo!\n\nCamilo Pérez\nMentor de Emprendedores en Negocios Digitales/g,'<p style="margin:32px 0 0;font-size:15px;color:#1A1A2E;font-family:Georgia,serif;line-height:1.8">Un Abrazo!<br><br><strong style="font-size:16px">Camilo Pérez</strong><br><span style="font-size:13px;color:#888">Mentor de Emprendedores en Negocios Digitales</span></p>')
         .replace(/\n\n/g,'</p><p style="margin:0 0 12px;line-height:1.8;color:#2A2A3E;font-family:Georgia,serif">')
@@ -124,44 +123,28 @@ export default async function handler(req, res) {
 <tr><td align="center" style="padding:32px 16px">
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
 
-  <!-- BIENVENIDA -->
+  <!-- HEADER -->
   <tr><td style="background:#FFFFFF;padding:40px 40px 28px;border-radius:12px 12px 0 0;border-top:3px solid #C9A84C">
     <p style="margin:0 0 16px;font-size:16px;color:#1A1A2E;line-height:1.7;font-family:Georgia,serif">Hola <strong>${name}</strong>,</p>
-    <p style="margin:0 0 14px;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif">Completaste tu diagnóstico de identidad. Lo que acabas de descubrir no es un defecto — es el punto de partida más honesto que puedes tener como emprendedor.</p>
-    <p style="margin:0 0 14px;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif">Antes de leer tu reporte, te pido que veas el video que está justo abajo. En él explico qué significa cada patrón de identidad, desde dónde nace y por qué reconocerlo cambia todo. Con ese contexto, tu reporte va a tener mucho más sentido.</p>
-    <p style="margin:0;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif"><strong style="color:#1A1A2E">Tómate 8 minutos para verlo antes de seguir.</strong> Vale la pena.</p>
+    <p style="margin:0 0 14px;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif">Aquí está tu checklist personalizado de la semana. Lo armamos según tu momento, tu tipo de negocio y las horas que tienes disponibles.</p>
+    <p style="margin:0;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif"><strong style="color:#1A1A2E">No lo guardes para después. Ábrelo, léelo y arranca con la primera tarea hoy.</strong></p>
   </td></tr>
 
-  <!-- VIDEO -->
-  <tr><td style="background:#FFFFFF;padding:0 40px 36px;text-align:center">
-    <a href="${VIDEO_URL}" style="display:block;text-decoration:none">
-      <div style="border-radius:10px;overflow:hidden;border:2px solid rgba(201,168,76,0.4)">
-        <div style="overflow:hidden;border-radius:8px;max-height:293px"><img src="${VIDEO_THUMBNAIL}" alt="Las Identidades del Emprendedor" width="520" style="width:100%;max-width:520px;display:block;margin-top:-10%;margin-bottom:-10%"></div>
-      </div>
-      <p style="margin:12px 0 0;font-size:13px;color:#C9A84C;font-weight:700;letter-spacing:0.04em;font-family:Arial,sans-serif">▶ Ver video — Las Identidades del Emprendedor</p>
-    </a>
-  </td></tr>
-
-  <!-- SEPARADOR -->
-  <tr><td style="background:#F5F0E8;padding:24px 40px;text-align:center">
-    <p style="margin:0;font-size:17px;color:#1A1A2E;font-style:italic;font-family:Georgia,serif;font-weight:700">¿Ya lo viste? Ahora sí — aquí está tu reporte.</p>
-  </td></tr>
-
-  <!-- PATRÓN PREDOMINANTE BADGE -->
+  <!-- BADGE -->
   <tr><td style="background:#1A1A2E;padding:22px 40px">
-    <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:0.18em;text-transform:uppercase;font-family:Arial,sans-serif">TU PATRÓN PREDOMINANTE</p>
-    <p style="margin:0;font-size:26px;font-weight:700;color:#FFFFFF;font-family:Georgia,serif">${patron}</p>
+    <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:0.18em;text-transform:uppercase;font-family:Arial,sans-serif">TU SEMANA DE ACCIÓN</p>
+    <p style="margin:0;font-size:22px;font-weight:700;color:#FFFFFF;font-family:Georgia,serif">Checklist personalizado para ${name}</p>
   </td></tr>
 
-  <!-- REPORTE -->
+  <!-- CHECKLIST -->
   <tr><td style="background:#FFFFFF;padding:32px 40px">
     <p style="margin:0 0 12px;line-height:1.8;color:#2A2A3E;font-family:Georgia,serif">${reportHtml}</p>
   </td></tr>
 
   <!-- CTA FINAL -->
   <tr><td style="background:#1A1A2E;padding:28px 40px">
-    <p style="margin:0 0 16px;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif">¿Quieres ir más profundo? El trabajo de resignificar tu patrón de identidad es exactamente lo que hacemos en mi Mentoría para Emprendedores Digitales.</p>
-    <p style="margin:0 0 20px;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif;font-style:italic">¿Qué te llevás de este diagnóstico? <strong style="color:#FFFFFF;font-style:normal">Responde este correo con lo primero que se te venga a la mente. Lo leo personalmente.</strong></p>
+    <p style="margin:0 0 16px;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif">¿Quieres construir un negocio digital con estructura real, no con improvisación?</p>
+    <p style="margin:0 0 20px;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif;font-style:italic">¿Cómo te fue con tu checklist? <strong style="color:#FFFFFF;font-style:normal">Responde este correo y cuéntame. Lo leo personalmente.</strong></p>
   </td></tr>
 
   <!-- FOOTER -->
@@ -184,7 +167,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           from: 'Camilo Pérez García <camilo@miimperiodigital.com>',
           to: [email],
-          subject: `${name}, tu diagnóstico de identidad está aquí`,
+          subject: `${name}, tu semana de acción está aquí ✦`,
           html: emailHtml
         })
       });
