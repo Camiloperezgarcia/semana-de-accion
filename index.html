@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico de Identidad — Camilo Pérez García</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#111111;--navy-card:#1A1A2E;--gold:#C9A84C;
+    --gold-dim:rgba(201,168,76,0.15);--gold-border:rgba(201,168,76,0.3);
+    --cream:#F5F0E8;--cream-dim:rgba(245,240,232,0.6);--white:#FFFFFF;
+    --radius:14px;--radius-sm:8px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:#111111;color:var(--cream);font-family:'Archivo',sans-serif;min-height:100vh;overflow-x:hidden}
+  .bg-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(80px);opacity:0.06}
+  .bg-orb-1{width:600px;height:600px;background:var(--gold);top:-200px;right:-200px}
+  .bg-orb-2{width:400px;height:400px;background:#6B4FCF;bottom:-100px;left:-100px}
+  .app{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+  .card{background:var(--navy-card);border:1px solid var(--gold-border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:620px;position:relative;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,0.4);animation:fadeUp 0.6s ease both}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  .progress-wrap{margin-bottom:2rem}
+  .progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .progress-text{font-size:11px;font-weight:600;color:var(--gold);letter-spacing:0.1em;text-transform:uppercase}
+  .progress-track{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),#E8C76C);border-radius:2px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)}
+  .screen{display:none;animation:fadeUp 0.4s ease both}
+  .screen.active{display:block}
+  .logo-mark{width:56px;height:56px;border-radius:14px;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem}
+  .logo-mark svg{width:28px;height:28px}
+  h1{font-family:'Sora',sans-serif;font-size:clamp(1.6rem,4vw,2rem);font-weight:800;color:var(--white);line-height:1.15;margin-bottom:0.5rem}
+  h1 em{color:var(--gold);font-style:normal}
+  .subtitle{font-size:15px;color:var(--cream-dim);line-height:1.6;margin-bottom:1.75rem}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2rem}
+  .info-item{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:center;gap:10px}
+  .info-icon{font-size:18px;flex-shrink:0}
+  .info-text{font-size:12px;color:var(--cream-dim);line-height:1.4}
+  .info-text strong{color:var(--cream);font-weight:500;display:block}
+  .q-number{font-family:'Sora',sans-serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+  .q-number::after{content:'';flex:1;height:1px;background:var(--gold-border)}
+  .q-text{font-family:'Sora',sans-serif;font-size:clamp(1.1rem,2.5vw,1.35rem);font-weight:700;color:var(--white);line-height:1.4;margin-bottom:1.75rem}
+  .scale-label{font-size:16px;font-weight:500;color:var(--cream);background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.2);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:1.5rem;font-style:italic;line-height:1.6;letter-spacing:0.01em}
+  .scale-options{display:flex;gap:10px;justify-content:space-between;margin-bottom:1rem}
+  .scale-btn{flex:1;aspect-ratio:1;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);color:var(--cream-dim);font-family:'Sora',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center}
+  .scale-btn:hover{border-color:var(--gold-border);color:var(--gold);background:var(--gold-dim)}
+  .scale-btn.selected{border-color:var(--gold);background:var(--gold-dim);color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.1)}
+  .scale-ends{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,0.3)}
+  .options-list{display:flex;flex-direction:column;gap:10px}
+  .option-btn{width:100%;text-align:left;background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.08);border-radius:var(--radius-sm);padding:14px 16px;color:var(--cream-dim);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:flex-start;gap:12px}
+  .option-btn:hover{border-color:var(--gold-border);color:var(--cream);background:rgba(201,168,76,0.06)}
+  .option-btn.selected{border-color:var(--gold);color:var(--white);background:var(--gold-dim);box-shadow:0 0 0 3px rgba(201,168,76,0.08)}
+  .option-letter{width:24px;height:24px;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;font-family:'Sora',sans-serif;font-size:11px;font-weight:700;color:var(--cream-dim);transition:all 0.2s}
+  .option-btn.selected .option-letter{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+  .capture-title{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:800;color:var(--white);margin-bottom:0.5rem}
+  .capture-sub{font-size:14px;color:var(--cream-dim);line-height:1.6;margin-bottom:1.75rem}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px}
+  .field input{width:100%;padding:13px 16px;background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;transition:border-color 0.2s;outline:none}
+  .field input:focus{border-color:var(--gold)}
+  .field input::placeholder{color:rgba(255,255,255,0.25)}
+  .btn-primary{width:100%;padding:15px 24px;background:var(--gold);border:none;border-radius:var(--radius-sm);color:var(--navy);font-family:'Sora',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:1.5rem}
+  .btn-primary:hover{background:#D4B05A;transform:translateY(-1px);box-shadow:0 8px 24px rgba(201,168,76,0.25)}
+  .btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn-ghost{background:transparent;border:1.5px solid var(--gold-border);color:var(--cream-dim);border-radius:var(--radius-sm);padding:13px 24px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;width:100%;margin-top:10px}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--cream)}
+  .report-header{display:flex;align-items:center;gap:14px;margin-bottom:1.75rem;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.07)}
+  .pattern-badge{padding:6px 14px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:20px;font-family:'Sora',sans-serif;font-size:12px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap}
+  .report-name{font-family:'Sora',sans-serif;font-size:1rem;font-weight:700;color:var(--white)}
+  .report-body{font-size:14px;color:var(--cream-dim);line-height:1.8;white-space:pre-wrap}
+  .report-body strong{color:var(--white);font-weight:600}
+  .report-cta{margin-top:2rem;padding:20px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--radius-sm);text-align:center}
+  .report-cta p{font-size:13px;color:var(--cream-dim);margin-bottom:8px;line-height:1.5}
+  .report-cta strong{color:var(--gold);font-family:'Sora',sans-serif;font-size:16px;display:block;margin-bottom:4px}
+  .footer{margin-top:1.5rem;text-align:center;font-size:12px;color:rgba(255,255,255,0.2)}
+  .footer a{color:var(--gold);text-decoration:none;opacity:0.7}
+  .error-msg{font-size:12px;color:#FF6B6B;margin-top:8px;display:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* PERFIL SCREEN */
+  .perfil-intro{font-size:14px;color:var(--cream-dim);line-height:1.6;margin-bottom:1.5rem;padding:14px 16px;background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius-sm)}
+  @media(max-width:480px){.card{padding:1.75rem 1.25rem}.info-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="app">
+<div class="card">
+
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-label">
+      <span class="progress-text" id="progressText">Pregunta 1 de 13</span>
+      <span class="progress-text" id="progressPct">8%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:8%"></div></div>
+  </div>
+
+  <!-- WELCOME -->
+  <div class="screen active" id="screen-welcome">
+    <!-- Foto + nombre -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:1.5rem">
+      <img src="https://raw.githubusercontent.com/Camiloperezgarcia/diagnostico-identidad/main/camilo-intro.jpg?v=2" alt="Camilo Pérez García" style="width:90px;height:90px;border-radius:50%;object-fit:cover;object-position:center 25%;border:2px solid rgba(201,168,76,0.4);flex-shrink:0">
+      <div>
+        <div style="font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:2px">Camilo Pérez García</div>
+        <div style="font-size:12px;color:var(--cream-dim)">Mentor de Emprendedores Digitales</div>
+      </div>
+    </div>
+    <!-- Título -->
+    <h1 style="margin-bottom:1.25rem">¿Desde dónde estás <em>emprendiendo</em>?</h1>
+    <!-- Intro texto -->
+    <div style="background:rgba(201,168,76,0.06);border:1px solid rgba(201,168,76,0.15);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:1.5rem">
+      <p style="margin:0 0 10px;font-size:14px;color:var(--cream-dim);line-height:1.75">La mayoría de emprendedores trabaja duro, aplica estrategias y aun así siente que algo no termina de funcionar. Hacen y hacen, y siguen sin construir algo estable. El problema casi nunca es la táctica. Es la identidad desde la que están construyendo.</p>
+      <p style="margin:0 0 10px;font-size:14px;color:var(--cream-dim);line-height:1.75">En este diagnóstico vas a descubrir cuál de las <strong style="color:var(--cream)">8 Identidades del Emprendedor</strong> te describe y qué consecuencias concretas está teniendo en tu negocio hoy.</p>
+      <p style="margin:0;font-size:14px;color:var(--cream-dim);line-height:1.75;font-style:italic">Responde con honestidad. No hay respuestas buenas ni malas.</p>
+    </div>
+    <!-- Info grid -->
+    <div class="info-grid" style="margin-bottom:1.5rem">
+      <div class="info-item"><span class="info-icon">🎯</span><div class="info-text"><strong>13 preguntas</strong>para identificar tu patrón real</div></div>
+      <div class="info-item"><span class="info-icon">🔍</span><div class="info-text"><strong>Reporte personalizado</strong>generado para tu perfil</div></div>
+      <div class="info-item"><span class="info-icon">🛡️</span><div class="info-text"><strong>Sin respuestas correctas</strong>solo respuestas honestas</div></div>
+      <div class="info-item"><span class="info-icon">📧</span><div class="info-text"><strong>Llega a tu email</strong>para que lo tengas siempre</div></div>
+    </div>
+    <button class="btn-primary" onclick="startQuiz()">Comenzar el diagnóstico <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="footer">Por <a href="https://instagram.com/camiloperezgarcia" target="_blank">@camiloperezgarcia</a></div>
+  </div>
+
+  <!-- PERFIL (Pregunta 0) -->
+  <div class="screen" id="screen-perfil">
+    <div class="q-number">Pregunta 1 de 13</div>
+    <div class="q-text">¿Cuál de estos perfiles describe mejor tu situación actual en el mundo digital?</div>
+    <p class="perfil-intro">Esta respuesta nos ayuda a personalizar tu primer paso concreto al final del diagnóstico.</p>
+    <div class="options-list" id="perfilOptions">
+      <button class="option-btn" onclick="selectPerfil('mentor', this)">
+        <span class="option-letter">A</span>
+        <span>Soy Mentor/a y creo infoproductos con mis conocimientos y talentos</span>
+      </button>
+      <button class="option-btn" onclick="selectPerfil('prestador', this)">
+        <span class="option-letter">B</span>
+        <span>Presto servicios al ecosistema digital como Agencia, Trafficker, Copywriter, Diseño Gráfico, entre otros</span>
+      </button>
+      <button class="option-btn" onclick="selectPerfil('creador', this)">
+        <span class="option-letter">C</span>
+        <span>Soy Creador/a de Contenido, UGC e Influencer</span>
+      </button>
+      <button class="option-btn" onclick="selectPerfil('explorando', this)">
+        <span class="option-letter">D</span>
+        <span>Todavía no tengo claro mi camino en el mundo digital</span>
+      </button>
+    </div>
+    <button class="btn-primary" id="btnPerfil" onclick="continuarDesdePerfil()" disabled>Siguiente <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
+
+  <!-- QUESTION -->
+  <div class="screen" id="screen-question">
+    <div class="q-number" id="qNumber">Pregunta 2 de 13</div>
+    <div class="q-text" id="qText"></div>
+    <div id="qOptions"></div>
+    <div style="display:flex;gap:10px;margin-top:1.5rem">
+      <button id="btnBack" onclick="prevQuestion()" style="background:transparent;border:1.5px solid rgba(255,255,255,0.1);border-radius:8px;color:rgba(245,240,232,0.4);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;padding:15px 18px;transition:all 0.2s;flex-shrink:0" onmouseover="this.style.borderColor='rgba(201,168,76,0.4)';this.style.color='rgba(245,240,232,0.8)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='rgba(245,240,232,0.4)'">← Volver</button>
+      <button class="btn-primary" id="btnNext" onclick="nextQuestion()" disabled style="margin-top:0;flex:1">Siguiente <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </div>
+
+  <!-- EMAIL -->
+  <div class="screen" id="screen-email">
+    <div class="logo-mark"><svg viewBox="0 0 28 28" fill="none"><path d="M4 8l10 8 10-8M4 8h20v14H4V8z" stroke="#C9A84C" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="capture-title">Tu reporte está listo ✦</div>
+    <p class="capture-sub">Ingresa tu nombre y correo para ver tu patrón de identidad y el análisis personalizado de lo que le está costando a tu negocio.</p>
+    <div class="field"><label>Tu nombre</label><input type="text" id="inputName" placeholder="¿Cómo te llamas?" autocomplete="given-name"></div>
+    <div class="field"><label>Tu email</label><input type="email" id="inputEmail" placeholder="tu@email.com" autocomplete="email"></div>
+    <p class="error-msg" id="emailError">Por favor ingresa un nombre y email válido.</p>
+    <button class="btn-primary" id="btnReport" onclick="generateReport()">Ver mi reporte <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="footer" style="margin-top:1rem">Tu información es privada. No compartimos datos con terceros.</div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="screen" id="screen-loading" style="text-align:center;padding:2rem 0">
+    <div style="width:56px;height:56px;border:2px solid rgba(201,168,76,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem"></div>
+    <div style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:700;color:var(--white);margin-bottom:0.5rem">Analizando tus respuestas <span id="loadingName" style="color:var(--gold)"></span>...</div>
+    <div style="font-size:13px;color:var(--cream-dim)">Estamos generando tu reporte personalizado.<br>Esto toma unos segundos.</div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="screen" id="screen-report">
+    <div class="report-header">
+      <div>
+        <div class="pattern-badge" id="reportBadge">Patrón predominante</div>
+        <div class="report-name" id="reportName" style="margin-top:6px"></div>
+      </div>
+    </div>
+    <div class="report-body" id="reportBody"></div>
+    <div class="report-cta" style="background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:14px;padding:28px 24px;text-align:center;margin-top:2rem">
+      <div style="font-size:2.8rem;margin-bottom:10px">🎉</div>
+      <p style="font-family:'Sora',sans-serif;font-size:1.1rem;font-weight:800;color:#FFFFFF;margin:0 0 6px">¡Felicitaciones! Completaste el Paso 1</p>
+      <p style="font-size:13px;color:rgba(245,240,232,0.6);margin:0 0 20px;line-height:1.6">Tu diagnóstico está listo. Ahora falta un paso para tener tu reporte completo.</p>
+      <!-- Barra de progreso 50% -->
+      <div style="margin:0 0 20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:0.08em;text-transform:uppercase">Tu progreso</span>
+          <span style="font-size:11px;font-weight:700;color:#C9A84C">50%</span>
+        </div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
+          <div style="width:50%;height:100%;background:linear-gradient(90deg,#C9A84C,#E8C76C);border-radius:3px"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;gap:8px">
+          <div style="flex:1;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.4);border-radius:8px;padding:10px 8px;text-align:center">
+            <div style="font-size:16px;margin-bottom:4px">✅</div>
+            <div style="font-size:11px;font-weight:600;color:#C9A84C">Paso 1</div>
+            <div style="font-size:10px;color:rgba(245,240,232,0.5);margin-top:2px">Diagnóstico completado</div>
+          </div>
+          <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 8px;text-align:center">
+            <div style="font-size:16px;margin-bottom:4px">✉️</div>
+            <div style="font-size:11px;font-weight:600;color:rgba(245,240,232,0.5)">Paso 2</div>
+            <div style="font-size:10px;color:rgba(245,240,232,0.3);margin-top:2px">Ver tu reporte en el correo</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:#1A1A2E;border:1px solid rgba(201,168,76,0.5);border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:center;gap:10px">
+        <span style="font-size:1.3rem">📩</span>
+        <span style="font-size:14px;font-weight:700;color:#C9A84C;letter-spacing:0.02em">Ve a tu correo y completa el Paso 2</span>
+      </div>
+    </div>
+    <button class="btn-ghost" id="btnPDF" onclick="downloadPDF()" style="border-color:var(--gold);color:var(--gold);font-weight:600">↓ Descargar mi reporte en PDF</button>
+    <div class="footer">© Camilo Pérez García · <a href="https://instagram.com/camiloperezgarcia" target="_blank">@camiloperezgarcia</a></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+const patternNames = {
+  demostrador:'El Demostrador',fugitivo:'El Fugitivo',urgente:'El Urgente',
+  buscador:'El Buscador de Reconocimiento',perfeccionista:'El Perfeccionista Paralizado',
+  seguidor:'El Seguidor de Tendencias',salvador:'El Salvador',impostor:'El Impostor Silencioso'
+};
+
+// Primer paso personalizado por perfil
+const primerPasoPorPerfil = {
+  mentor: 'Toma tres resultados concretos de personas que hayas acompañado o asesorado. Escribe en qué cambió específicamente su situación. Comparte uno —solo uno— en tu canal principal, con tu nombre visible. No perfeccionista. Solo honesto. Esto no es promoción, es documentación de lo que ya está pasando. Hazlo antes de viernes.',
+  prestador: 'Escribe en una sola frase qué problema específico resuelves y para quién. No "hago diseño" — sino "ayudo a coaches a tener una identidad visual que les genera confianza antes de que abran la boca". Comparte esa frase en tu canal principal esta semana. Así de simple.',
+  creador: 'Graba un video o publica un post contando por qué empezaste a crear contenido — la razón real, no la versión editada. Sin producción perfecta. La autenticidad hace más que la estética en este momento. Publícalo antes de viernes.',
+  explorando: 'Escribe en papel tres cosas que sabes hacer mejor que la mayoría de personas en tu entorno. No lo que crees que "debería" monetizarse — lo que genuinamente dominas. Ese es tu punto de partida. Esta semana, solo observa cuál de las tres te genera más energía cuando la practicas.'
+};
+
+const questions = [
+  {id:1,type:'multiple',text:'¿Cuál fue la razón más honesta por la que decidiste emprender?',options:[
+    {letter:'A',text:'Estaba cansada/o de depender de un empleo y quería salir de ese sistema',scores:{fugitivo:3}},
+    {letter:'B',text:'Necesitaba generar más ingresos y el empleo ya no era suficiente',scores:{urgente:3}},
+    {letter:'C',text:'Quería demostrarle a alguien (familia, pareja, amigos) que podía hacerlo',scores:{demostrador:3}},
+    {letter:'D',text:'Vi que otras personas lo estaban haciendo y sentí que yo también podía',scores:{seguidor:3}}
+  ]},
+  {id:2,type:'scale',text:'¿Qué tanto te identifica esta afirmación?',label:'"Antes de lanzar algo nuevo, necesito que esté completamente listo."',scores:{1:{perfeccionista:0},2:{perfeccionista:1},3:{perfeccionista:2},4:{perfeccionista:3},5:{perfeccionista:4}}},
+  {id:3,type:'multiple',text:'Cuando publicas contenido en redes sociales o compartes tu trabajo, ¿qué es lo que más esperas que pase?',options:[
+    {letter:'A',text:'Que la gente lo vea, lo comparta y te reconozca como referente en tu área',scores:{buscador:3}},
+    {letter:'B',text:'Que alguien que lo necesita lo encuentre y le ayude de verdad',scores:{salvador:3}},
+    {letter:'C',text:'Que las personas que dudaban de ti lo vean y entiendan que ibas en serio',scores:{demostrador:3}},
+    {letter:'D',text:'Que no recibas críticas; si sale bien, alivias la presión de que te "descubran"',scores:{impostor:3}}
+  ]},
+  {id:4,type:'multiple',text:'¿Cómo tomas la mayoría de las decisiones importantes de tu negocio?',options:[
+    {letter:'A',text:'Según lo que más urgencia me genera en ese momento, lo que necesita atención ya',scores:{urgente:3}},
+    {letter:'B',text:'Según lo que está funcionando para otras personas en mi industria ahora mismo',scores:{seguidor:3}},
+    {letter:'C',text:'Después de haber analizado bien todas las opciones, porque no me gusta decidir sin suficiente información',scores:{perfeccionista:2}},
+    {letter:'D',text:'Desde la intuición; si siento que algo me aleja de lo que no quiero, lo evito',scores:{fugitivo:2}}
+  ]},
+  {id:5,type:'scale',text:'¿Qué tanto te identifica esta afirmación?',label:'"Aunque tengo conocimiento y experiencia, una parte de mí siente que no estoy suficientemente preparada/o para cobrar lo que cobro o para posicionarme como referente en mi área."',scores:{1:{impostor:0},2:{impostor:1},3:{impostor:2},4:{impostor:3},5:{impostor:4}}},
+  {id:6,type:'multiple',text:'Cuando piensas en tu negocio siendo exitoso, ¿cuál de estas imágenes te genera más satisfacción?',options:[
+    {letter:'A',text:'Ver que las personas que acompañé transformaron su vida gracias a tu trabajo',scores:{salvador:3}},
+    {letter:'B',text:'Ser reconocida/o como referente en tu industria y que la gente te busque por tu nombre',scores:{buscador:3}},
+    {letter:'C',text:'Tener estabilidad financiera real, saber que el negocio paga bien y de manera constante',scores:{urgente:2}},
+    {letter:'D',text:'Que alguien que antes dudó de ti vea los resultados y reconozca que tenías razón',scores:{demostrador:3}}
+  ]},
+  {id:7,type:'multiple',text:'¿Con qué frecuencia has cambiado de mensaje, modelo de negocio o enfoque desde que empezaste tu negocio?',options:[
+    {letter:'A',text:'Varias veces, siempre hay algo nuevo que parece mejor o más rentable',scores:{seguidor:3}},
+    {letter:'B',text:'Pocas veces, pero cada cambio fue después de mucho análisis',scores:{perfeccionista:2}},
+    {letter:'C',text:'Casi nunca el mensaje, pero todavía no encuentro la manera perfecta de mostrar lo que hago',scores:{impostor:2}},
+    {letter:'D',text:'Cada vez que algo no funciona como esperaba o cuando siento que el mercado cambió',scores:{fugitivo:2,urgente:1}}
+  ]},
+  {id:8,type:'scale',text:'¿Qué tanto te identifica esta afirmación?',label:'"Me cuesta cobrar lo que realmente vale mi trabajo porque siento que no debería poner el dinero por encima de ayudar a las personas."',scores:{1:{salvador:0},2:{salvador:1},3:{salvador:2},4:{salvador:3},5:{salvador:4}}},
+  {id:9,type:'multiple',text:'Cuando alguien cuestiona tu trabajo o te da una crítica, ¿qué es lo primero que sientes?',options:[
+    {letter:'A',text:'Necesidad de demostrar que estaban equivocados y que sí sabes lo que haces',scores:{demostrador:3}},
+    {letter:'B',text:'Preocupación por cómo eso afecta tu imagen o lo que los demás piensan de ti',scores:{buscador:3}},
+    {letter:'C',text:'Confirmación de la voz interna que ya te decía que no eras suficientemente buena/o',scores:{impostor:3}},
+    {letter:'D',text:'Presión de cambiar algo rápido para que no afecte las ventas o los ingresos',scores:{urgente:2}}
+  ]},
+  {id:10,type:'scale',text:'¿Qué tanto te identifica esta afirmación?',label:'"Emprendí más para escapar de algo que no quería (un empleo, una situación, una dependencia familiar) que para construir un negocio que siempre tuve claro."',scores:{1:{fugitivo:0},2:{fugitivo:1},3:{fugitivo:2},4:{fugitivo:3},5:{fugitivo:4}}},
+  {id:11,type:'multiple',text:'¿Cuál de estas frases describe mejor cómo te sientes cuando tu negocio pasa por un momento difícil?',options:[
+    {letter:'A',text:'"¿Para qué sigo si nadie parece valorar lo que hago?", la motivación dependía de la validación',scores:{demostrador:2,buscador:2}},
+    {letter:'B',text:'"Necesito cambiar de estrategia ya, esto no puede seguir así"',scores:{urgente:3}},
+    {letter:'C',text:'"Esto confirma que no estaba lista/o, debería haber esperado más"',scores:{perfeccionista:3,impostor:2}},
+    {letter:'D',text:'"Me pregunto si este camino es el correcto o si debería probar otra cosa"',scores:{fugitivo:2,seguidor:2}}
+  ]},
+  {id:12,type:'multiple',text:'Si tu negocio funcionara exactamente como lo sueñas, ¿qué sería lo más importante que habrías logrado?',options:[
+    {letter:'A',text:'Que las personas que antes no creían en mí vean el éxito que construí',scores:{demostrador:3}},
+    {letter:'B',text:'Ser reconocida/o como una de las referencias más importantes en mi industria',scores:{buscador:3}},
+    {letter:'C',text:'Haber ayudado a tantas personas que tu trabajo habla por sí solo',scores:{salvador:3}},
+    {letter:'D',text:'Tener un negocio estable que genere ingresos consistentes sin depender de factores externos',scores:{urgente:2}},
+    {letter:'E',text:'Haber construido exactamente lo que siempre quise, sin copiar el modelo de nadie',scores:{seguidor:-2}}
+  ]}
+];
+
+let currentQ=0,selectedAnswer=null,perfilSeleccionado=null;
+let scores={demostrador:0,fugitivo:0,urgente:0,buscador:0,perfeccionista:0,seguidor:0,salvador:0,impostor:0};
+let answersHistory=[];
+const TOTAL_PREGUNTAS = 13;
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const s=document.getElementById('screen-'+id);
+  if(s){s.classList.add('active');s.style.animation='none';s.offsetHeight;s.style.animation=''}
+}
+
+function startQuiz(){
+  document.getElementById('progressWrap').style.display='block';
+  updateProgressPerfil();
+  showScreen('perfil');
+}
+
+function updateProgressPerfil(){
+  const pct=Math.round((1/TOTAL_PREGUNTAS)*100);
+  document.getElementById('progressText').textContent='Pregunta 1 de '+TOTAL_PREGUNTAS;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=pct+'%';
+}
+
+function selectPerfil(perfil, btn){
+  perfilSeleccionado = perfil;
+  document.querySelectorAll('#perfilOptions .option-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('btnPerfil').disabled=false;
+}
+
+function continuarDesdePerfil(){
+  if(!perfilSeleccionado)return;
+  showScreen('question');
+  renderQuestion(0);
+}
+
+function updateProgress(idx){
+  const preguntaActual = idx + 2; // +2 porque la pregunta de perfil es la 1
+  const pct=Math.round((preguntaActual/TOTAL_PREGUNTAS)*100);
+  document.getElementById('progressText').textContent='Pregunta '+preguntaActual+' de '+TOTAL_PREGUNTAS;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('progressFill').style.width=pct+'%';
+}
+
+function renderQuestion(idx){
+  const q=questions[idx];currentQ=idx;selectedAnswer=null;
+  document.getElementById('btnNext').disabled=true;
+  const preguntaActual = idx + 2;
+  document.getElementById('qNumber').textContent='Pregunta '+preguntaActual+' de '+TOTAL_PREGUNTAS;
+  document.getElementById('qText').textContent=q.text;
+  updateProgress(idx);
+  const container=document.getElementById('qOptions');
+  container.innerHTML='';
+  // Remover listeners anteriores clonando el nodo
+  const newContainer=container.cloneNode(false);
+  container.parentNode.replaceChild(newContainer,container);
+  const qOptions=document.getElementById('qOptions');
+
+  if(q.type==='scale'){
+    const label=document.createElement('div');
+    label.className='scale-label';
+    label.textContent=q.label;
+    qOptions.appendChild(label);
+    const wrap=document.createElement('div');
+    wrap.className='scale-options';
+    [1,2,3,4,5].forEach(n=>{
+      const btn=document.createElement('button');
+      btn.className='scale-btn';
+      btn.textContent=n;
+      btn.type='button';
+      btn.addEventListener('click',function(){
+        document.querySelectorAll('.scale-btn').forEach((b,i)=>b.classList.toggle('selected',i+1===n));
+        selectedAnswer=q.scores[n];
+        document.getElementById('btnNext').disabled=false;
+      });
+      wrap.appendChild(btn);
+    });
+    qOptions.appendChild(wrap);
+    const ends=document.createElement('div');
+    ends.className='scale-ends';
+    ends.innerHTML='<span>No me identifica</span><span>Me describe perfectamente</span>';
+    qOptions.appendChild(ends);
+  } else {
+    const list=document.createElement('div');
+    list.className='options-list';
+    q.options.forEach((opt,i)=>{
+      const btn=document.createElement('button');
+      btn.className='option-btn';
+      btn.type='button';
+      btn.innerHTML=`<span class="option-letter">${opt.letter}</span><span>${opt.text}</span>`;
+      btn.addEventListener('click',function(){
+        list.querySelectorAll('.option-btn').forEach((b,j)=>b.classList.toggle('selected',j===i));
+        selectedAnswer=opt.scores;
+        document.getElementById('btnNext').disabled=false;
+      });
+      list.appendChild(btn);
+    });
+    qOptions.appendChild(list);
+  }
+}
+
+function selectOption(idx,optScores){
+  document.querySelectorAll('#qOptions .option-btn').forEach((b,i)=>b.classList.toggle('selected',i===idx));
+  selectedAnswer=optScores;document.getElementById('btnNext').disabled=false;
+}
+
+function selectScale(val,scoreMap){
+  document.querySelectorAll('.scale-btn').forEach((b,i)=>b.classList.toggle('selected',i+1===val));
+  selectedAnswer=scoreMap[val];document.getElementById('btnNext').disabled=false;
+}
+
+function nextQuestion(){
+  if(!selectedAnswer)return;
+  answersHistory[currentQ]=selectedAnswer;
+  Object.entries(selectedAnswer).forEach(([p,pts])=>{scores[p]=(scores[p]||0)+pts});
+  if(currentQ<questions.length-1){renderQuestion(currentQ+1)}
+  else{document.getElementById('progressWrap').style.display='none';showScreen('email')}
+}
+
+function prevQuestion(){
+  if(currentQ===0){
+    // Volver a la pantalla de perfil
+    showScreen('perfil');
+    updateProgressPerfil();
+    return;
+  }
+  // Restar los puntos de la respuesta actual si existe
+  if(answersHistory[currentQ]){
+    Object.entries(answersHistory[currentQ]).forEach(([p,pts])=>{scores[p]=(scores[p]||0)-pts});
+    delete answersHistory[currentQ];
+  }
+  renderQuestion(currentQ-1);
+  // Restaurar respuesta anterior si existe
+  const prev=answersHistory[currentQ];
+  if(prev){
+    selectedAnswer=prev;
+    document.getElementById('btnNext').disabled=false;
+  }
+}
+
+function getTopPatterns(){
+  const sorted=Object.entries(scores).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a);
+  const primary=sorted[0]?sorted[0][0]:'demostrador';
+  const primaryScore=sorted[0]?sorted[0][1]:0;
+  const secondary=sorted[1]&&sorted[1][1]>=primaryScore*0.5?sorted[1][0]:null;
+  return{primary,secondary};
+}
+
+async function generateReport(){
+  const name=document.getElementById('inputName').value.trim();
+  const email=document.getElementById('inputEmail').value.trim();
+  const emailErr=document.getElementById('emailError');
+  if(!name||!email||!email.includes('@')){emailErr.style.display='block';return}
+  emailErr.style.display='none';
+  const btn=document.getElementById('btnReport');
+  btn.disabled=true;btn.textContent='Generando...';
+  const{primary,secondary}=getTopPatterns();
+  const primerPaso = primerPasoPorPerfil[perfilSeleccionado] || primerPasoPorPerfil['explorando'];
+  document.getElementById('loadingName').textContent=name;
+  showScreen('loading');
+  try{
+    const reportRes=await fetch('/api/report',{signal:AbortSignal.timeout(25000),method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,primary,secondary,perfil:perfilSeleccionado,primerPaso})});
+    const{report}=await reportRes.json();
+    fetch('/api/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name,email,patron:patternNames[primary],patronSecundario:secondary?patternNames[secondary]:null,perfil:perfilSeleccionado,report:report||''})});
+    document.getElementById('reportBadge').textContent='Patrón predominante';
+    document.getElementById('reportName').textContent=patternNames[primary];
+    const raw=report||'No pudimos generar el reporte. Contáctanos directamente.';
+    const html=raw
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/^# (.+)$/gm,'<h2 style="font-family:\'Sora\',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;margin:1.2rem 0 0.4rem">$1</h2>')
+      .replace(/^## (.+)$/gm,'<h3 style="font-family:\'Sora\',sans-serif;font-size:1rem;font-weight:700;color:#C9A84C;margin:1rem 0 0.3rem">$1</h3>')
+      .replace(/^### (.+)$/gm,'<h4 style="font-family:\'Sora\',sans-serif;font-size:.95rem;font-weight:600;color:#fff;margin:.8rem 0 .2rem">$1</h4>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#fff;font-weight:600">$1</strong>')
+      .replace(/\*(.+?)\*/g,'<strong style="color:#fff;font-weight:600">$1</strong>')
+      .replace(/Un Abrazo! Camilo Pérez/g,'<br><br><span style="color:rgba(245,240,232,0.7);font-style:italic;line-height:2">Un Abrazo!<br><strong style="color:var(--cream);font-style:normal;font-size:15px">Camilo Pérez</strong><br><span style="font-size:12px;color:rgba(245,240,232,0.4)">Mentor de Emprendedores en Negocios Digitales</span></span>')
+      .replace(/ — /g,', ')
+      .replace(/ — /g,', ')
+      .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid rgba(201,168,76,0.2);margin:1rem 0">')
+      .replace(/\n\n/g,'</p><p style="margin:0.6rem 0">')
+      .replace(/\n/g,'<br>');
+    document.getElementById('reportBody').innerHTML='<p style="margin:0">'+html+'</p>';
+    showScreen('report');
+  }catch(err){
+    console.error(err);showScreen('email');
+    btn.disabled=false;btn.textContent='Ver mi reporte';
+    emailErr.textContent='Hubo un error. Intenta de nuevo.';emailErr.style.display='block';
+  }
+}
+
+function downloadPDF() {
+  var patron = document.getElementById('reportName').textContent;
+  var body = document.getElementById('reportBody').innerHTML;
+  var win = window.open('','_blank');
+  var css = '<style>* {-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;box-sizing:border-box} html,body{margin:0;padding:0;background:#F5F0E8!important;color:#1A1A2E!important;font-family:Archivo,sans-serif} .page{background:#F5F0E8!important;padding:40px 48px} .top-bar{height:4px;background:linear-gradient(90deg,#C9A84C,transparent);margin-bottom:32px;border-radius:2px} .header{display:flex;align-items:flex-start;gap:16px;padding-bottom:24px;border-bottom:2px solid #C9A84C;margin-bottom:28px} .logo-hex{width:48px;height:48px;background:rgba(26,26,46,0.08);border:1px solid rgba(26,26,46,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0} .header-text{flex:1} .badge{display:inline-block;background:rgba(26,26,46,0.08)!important;border:1px solid rgba(201,168,76,0.6);color:#C9A84C!important;font-family:Sora,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:8px} .patron-name{font-family:Sora,sans-serif;font-size:1.5rem;font-weight:800;color:#1A1A2E!important;margin:0;line-height:1.2} .handle{font-family:Sora,sans-serif;font-size:11px;color:rgba(201,168,76,0.7)!important;margin-top:4px} .report-content{font-size:14px;line-height:1.85;color:#2D2D4A!important} .report-content p{margin:0.6rem 0} .report-content h2{font-family:Sora,sans-serif;font-size:1.05rem;font-weight:700;color:#1A1A2E!important;margin:1.5rem 0 0.4rem} .report-content h3{font-family:Sora,sans-serif;font-size:0.95rem;font-weight:700;color:#C9A84C!important;margin:1.2rem 0 0.3rem} .report-content strong{color:#1A1A2E!important;font-weight:700} .report-content hr{border:none;border-top:1px solid rgba(201,168,76,0.3);margin:1.2rem 0} .cta-box{margin-top:2.5rem;padding:20px 24px;background:#1A1A2E!important;border:1px solid rgba(201,168,76,0.3);border-radius:10px;text-align:center} .cta-box p{font-size:12px;color:rgba(245,240,232,0.7)!important;margin:0 0 6px;line-height:1.5} .cta-keyword{font-family:Sora,sans-serif;font-size:17px;font-weight:800;color:#C9A84C!important;display:block;margin:6px 0} .footer-pdf{margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(26,26,46,0.15);font-size:11px;color:rgba(26,26,46,0.35)!important;text-align:center} @media print{.page{padding:24px 32px}}</style>';
+  var fonts = '<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">';
+  var html = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Reporte de Identidad</title>' + fonts + css + '</head><body>';
+  html += '<div class="page">';
+  html += '<div class="top-bar"></div>';
+  html += '<div class="header"><div class="logo-hex"><svg width="24" height="24" viewBox="0 0 28 28" fill="none"><path d="M14 3L25 9V19L14 25L3 19V9L14 3Z" stroke="#C9A84C" stroke-width="1.5"/><circle cx="14" cy="14" r="4" fill="#C9A84C" opacity="0.8"/></svg></div>';
+  html += '<div class="header-text"><div class="badge">Patrón predominante</div><div class="patron-name">' + patron + '</div><div class="handle">@camiloperezgarcia</div></div></div>';
+  html += '<div class="report-content">' + body + '</div>';
+  
+  html += '<div class="footer-pdf">© Camilo Pérez García · @camiloperezgarcia</div>';
+  html += '</div><script>window.onload=function(){setTimeout(function(){window.print();},800);}<\/script></body></html>';
+  win.document.write(html);
+  win.document.close();
+}
+</script>
+</body>
+</html>
