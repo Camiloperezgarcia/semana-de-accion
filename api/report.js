@@ -19,9 +19,9 @@ export default async function handler(req, res) {
   };
 
   const tipoTextos = {
-    A: 'Mentor — monetiza su conocimiento y experiencia',
-    B: 'Prestador de servicios — agencia, diseño, copy, embudos, trafficker, closer, etc.',
-    C: 'Creador de contenido / Influencer — construye audiencia y monetiza con marca, afiliación o producto propio'
+    A: 'Mentor, monetiza su conocimiento y experiencia',
+    B: 'Prestador de servicios, agencia, diseño, copy, embudos, etc.',
+    C: 'Creador de contenido / Influencer, construye audiencia y monetiza con marca, afiliación o producto propio'
   };
 
   const horasTextos = {
@@ -31,38 +31,44 @@ export default async function handler(req, res) {
   };
 
   const cuelloTextos = {
-    A: 'Contenido y comunidad — no está publicando o nadie interactúa',
-    B: 'Producto o servicio — no tiene claro qué está ofreciendo o necesita mejorarlo',
-    C: 'Ventas — tiene audiencia o producto, pero no está cerrando ventas'
+    A: 'Contenido y comunidad, no está publicando o nadie interactúa',
+    B: 'Producto o servicio, no tiene claro qué está ofreciendo o necesita mejorarlo',
+    C: 'Ventas, tiene audiencia o producto, pero no está cerrando ventas'
   };
 
   // ── Tabla de prioridad pre-calculada: momento × cuello_botella ──
   const prioridadTabla = {
-    'A-A': { prioridad: 'Definir tu mensaje y empezar a publicar', foco: 'Claridad de mensaje + primeras publicaciones' },
-    'A-B': { prioridad: 'Definir tu oferta mínima viable', foco: 'Estructurar qué ofreces, a quién y a qué precio' },
-    'A-C': { prioridad: 'Primero construye la base antes de vender', foco: 'Mensaje claro + oferta definida antes de pensar en ventas' },
-    'B-A': { prioridad: 'Crear un sistema de contenido semanal sostenible', foco: 'Rutina de publicación consistente + interacción con tu comunidad' },
-    'B-B': { prioridad: 'Pulir tu oferta para que sea clara y vendible', foco: 'Ajustar tu servicio o producto para que el mercado lo entienda rápido' },
-    'B-C': { prioridad: 'Activar tu proceso de ventas', foco: 'Convertir tu audiencia existente en clientes con un proceso claro' },
-    'C-A': { prioridad: 'Sistematizar tu contenido para que no dependa de ti', foco: 'Delegar o automatizar contenido para liberar tu tiempo' },
-    'C-B': { prioridad: 'Estandarizar y escalar tu servicio', foco: 'Documentar procesos y crear paquetes replicables' },
-    'C-C': { prioridad: 'Optimizar tu embudo de ventas', foco: 'Mejorar conversión en cada etapa del proceso de venta' }
+    'A-A': { prioridad: 'Definir tu mensaje y empezar a publicar', foco: 'Claridad de mensaje + primeras publicaciones', pilarPrincipal: 'P1 Identidad + P5 Herramientas' },
+    'A-B': { prioridad: 'Definir tu oferta mínima viable', foco: 'Estructurar qué ofreces, a quién y a qué precio', pilarPrincipal: 'P2 Estructura + P4 Visión' },
+    'A-C': { prioridad: 'Construir la base antes de vender', foco: 'Mensaje claro + oferta definida antes de pensar en ventas', pilarPrincipal: 'P1 Identidad + P2 Estructura' },
+    'B-A': { prioridad: 'Crear un sistema de contenido semanal', foco: 'Rutina de publicación consistente + interacción con tu comunidad', pilarPrincipal: 'P5 Herramientas + P2 Estructura' },
+    'B-B': { prioridad: 'Pulir tu oferta para que sea clara y vendible', foco: 'Ajustar tu servicio o producto para que el mercado lo entienda rápido', pilarPrincipal: 'P2 Estructura + P4 Visión' },
+    'B-C': { prioridad: 'Activar tu proceso de ventas', foco: 'Convertir tu audiencia existente en clientes con un proceso claro', pilarPrincipal: 'P2 Estructura + P3 Mentalidad' },
+    'C-A': { prioridad: 'Sistematizar tu contenido para que no dependa de ti', foco: 'Delegar o automatizar contenido para liberar tu tiempo', pilarPrincipal: 'P5 Herramientas + P2 Estructura' },
+    'C-B': { prioridad: 'Estandarizar y escalar tu servicio', foco: 'Documentar procesos y crear paquetes replicables', pilarPrincipal: 'P2 Estructura + P5 Herramientas' },
+    'C-C': { prioridad: 'Optimizar tu proceso de ventas existente', foco: 'Mejorar conversión en cada etapa del proceso de venta', pilarPrincipal: 'P2 Estructura + P3 Mentalidad' }
   };
 
-  // ── Cantidad de tareas según horas disponibles ──
-  const alcanceTareas = {
-    A: { tareas: '3 tareas máximo', nota: 'con menos de 5 horas, cada tarea debe ser de alto impacto y ejecutable en menos de 90 minutos' },
-    B: { tareas: '5 tareas', nota: 'con 5 a 15 horas tiene espacio para avanzar en varias áreas sin saturarse' },
-    C: { tareas: '7 tareas', nota: 'con más de 15 horas puede cubrir su prioridad principal y avanzar en áreas secundarias' }
+  // ── Profundidad según horas disponibles (ya no cambia la cantidad de tareas) ──
+  const profundidad = {
+    A: 'Las tareas deben ser de muy alto impacto y ejecutables en menos de 1 hora cada una. Prioriza lo esencial, nada secundario.',
+    B: 'Las tareas pueden tener profundidad moderada. Incluye tanto tareas rápidas como una o dos que requieran más dedicación.',
+    C: 'Las tareas pueden ser más profundas y ambiciosas. Incluye al menos una tarea de construcción de sistemas o procesos.'
   };
 
   const claveCombo = `${momento}-${cuello_botella}`;
   const prioridadInfo = prioridadTabla[claveCombo];
-  const alcance = alcanceTareas[horas_disponibles];
 
   const prompt = `Eres Camilo Pérez García, mentor de emprendedores en negocios digitales con sede en Cali, Colombia. Tu tono es cercano, honesto, directo pero humano, como hablarle a un estudiante de confianza. Sin corporativo, sin hype, sin promesas vacías.
 
-Genera un checklist personalizado de la semana para ${name}.
+TU METODOLOGÍA SE BASA EN 5 PILARES:
+- P1 IDENTIDAD: Quién eres como emprendedor, desde dónde emprendes, qué creencias te limitan. Sin identidad clara, cualquier estructura se tambalea.
+- P2 ESTRUCTURA: Cómo organizas tu negocio, tus procesos, tu oferta, tus sistemas. Un negocio que depende 100% de tu energía no es un negocio, es un trabajo propio disfrazado.
+- P3 MENTALIDAD: Tu relación con el dinero, el miedo financiero, la presión de generar ingresos. Cuando hay presión económica no construyes, reaccionas.
+- P4 VISIÓN: Hacia dónde vas, en qué etapa estás (Solopreneur, Emprendedor o Empresario), qué decisiones corresponden a tu etapa real.
+- P5 HERRAMIENTAS: Las plataformas, herramientas e IA correctas para tu etapa. No necesitas más herramientas, necesitas las correctas.
+
+Las recomendaciones que des SIEMPRE deben estar alineadas a estos pilares. Nunca des consejos genéricos de internet. Habla desde la experiencia de alguien que ya construyó esto.
 
 DATOS DEL EMPRENDEDOR:
 - Momento del negocio: ${momentoTextos[momento]}
@@ -72,8 +78,9 @@ DATOS DEL EMPRENDEDOR:
 
 PRIORIDAD #1 CALCULADA: ${prioridadInfo.prioridad}
 FOCO DE LA SEMANA: ${prioridadInfo.foco}
+PILARES QUE APLICAN: ${prioridadInfo.pilarPrincipal}
 
-ALCANCE DEL CHECKLIST: ${alcance.tareas} (${alcance.nota})
+PROFUNDIDAD DE TAREAS: ${profundidad[horas_disponibles]}
 
 El checklist debe tener entre 400 y 550 palabras. Usa exactamente esta estructura con estos títulos en markdown:
 
@@ -85,17 +92,18 @@ El checklist debe tener entre 400 y 550 palabras. Usa exactamente esta estructur
    - Escribe frases cortas y directas, una idea por oración
    - Máximo 3-4 oraciones
    - Separa cada oración con punto y seguido
-   - Ejemplo de tono: "Tienes audiencia pero no está comprando. El problema no es visibilidad. Esta semana necesitas mapear tu proceso de ventas real."
+   - Conecta la prioridad con el pilar correspondiente de la metodología
 
 3. ## Tu checklist de la semana
-   Lista exactamente ${alcance.tareas} concretas, específicas y accionables. Cada tarea debe:
+   Lista exactamente 5 tareas concretas, específicas y accionables. Cada tarea debe:
    - Empezar con un emoji de checkbox (☐)
    - Ser una acción concreta, no un concepto abstracto
-   - Incluir un tiempo estimado realista
+   - Incluir un tiempo estimado redondeado: solo "(30 min)", "(45 min)", "(1 hora)" o "(2 horas)"
    - Estar adaptada al tipo de emprendedor (${tipoTextos[tipo_emprendedor]})
+   - Estar conectada a uno de los 5 pilares de la metodología
    
    Ejemplo de formato:
-   ☐ **Escribir 3 ideas de contenido** basadas en preguntas frecuentes de tus clientes (30 min)
+   ☐ **Escribir 3 ideas de contenido** basadas en preguntas que te hacen tus clientes actuales (30 min)
 
 4. ## Tu acción #1 para hoy
    Una sola acción que puede hacer hoy mismo, en menos de 30 minutos, que le dé impulso para arrancar la semana. Sé muy concreto.
@@ -103,10 +111,9 @@ El checklist debe tener entre 400 y 550 palabras. Usa exactamente esta estructur
 REGLAS IMPORTANTES:
 - Habla en segunda persona (tú)
 - Usa lenguaje neutro e inclusivo: evita términos que asuman género
-- NUNCA uses anglicismos ni palabras en inglés (no "salesy", no "engagement", no "leads", no "funnel"). Usa siempre el equivalente en español natural
-- Las tareas deben ser ESPECÍFICAS para su tipo de emprendedor y su cuello de botella, no genéricas
-- No incluyas tareas que no pueda hacer con las horas que tiene disponibles
-- Los tiempos estimados deben ser simples: usa solo "(30 min)", "(1 hora)", "(45 min)", "(2 horas)". No combines unidades como "(1 hora 15 min)", redondea al valor más cercano
+- NUNCA uses anglicismos ni palabras en inglés. Usa siempre el equivalente en español natural
+- Cada tarea debe estar alineada a los pilares de la metodología, no a consejos genéricos
+- Los tiempos estimados deben ser simples y redondeados: "(30 min)", "(45 min)", "(1 hora)", "(2 horas)"
 - Tono: cercano, práctico, como alguien que ya recorrió este camino y te dice exactamente qué hacer
 - Cuando uses palabras entre asteriscos simples como *palabra*, escríbelas entre doble asterisco **palabra** para que queden en negrilla
 - Evita usar guiones largos (—) en el texto; usa comas o punto y coma para separar ideas
