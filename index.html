@@ -75,8 +75,8 @@
   /* ── Report: Priority card ── */
   .priority-card{background:var(--navy);border-radius:var(--radius);padding:24px;margin-bottom:1.5rem}
   .priority-label{font-family:'Sora',sans-serif;font-size:10px;font-weight:700;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px}
-  .priority-text{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;color:var(--white);line-height:1.4}
-  .priority-sub{font-size:13.5px;color:rgba(245,240,232,0.6);line-height:1.6;margin-top:8px}
+  .priority-text{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:400;color:rgba(245,240,232,0.9);line-height:1.85}
+  .priority-sub{font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(245,240,232,0.6);line-height:1.85;margin-top:10px}
 
   /* ── Report: Task cards ── */
   .task-section-title{font-family:'Sora',sans-serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:0.08em;text-transform:uppercase;margin:1.5rem 0 0.75rem;display:flex;align-items:center;gap:8px}
@@ -104,7 +104,8 @@
 
   /* ── Report CTA ── */
   .report-cta{background:var(--navy);border-radius:var(--radius);padding:28px 24px;text-align:center;margin-top:1.75rem}
-  .report-intro{font-size:14px;color:var(--navy-text-dim);line-height:1.7;margin-bottom:1.5rem}
+  .report-intro{font-family:'Sora',sans-serif;font-size:1.25rem;font-weight:700;color:var(--navy);line-height:1.45;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--navy-border)}
+  .report-intro .name-highlight{color:var(--gold)}
 
   .footer{margin-top:1.25rem;text-align:center;font-size:11px;color:rgba(26,26,46,0.3)}
   .footer a{color:var(--gold);text-decoration:none;font-weight:600}
@@ -364,7 +365,7 @@ function parseReport(raw) {
       const taskMatch = line.match(/^☐\s*(.+)/);
       if (taskMatch) {
         let taskText = taskMatch[1];
-        const timeMatch = taskText.match(/\((\d+\s*(?:min|hora|horas|h)(?:\s*[-–]\s*\d+\s*(?:min|hora|horas|h))?)\)\s*$/i);
+        const timeMatch = taskText.match(/\((\d+\s*(?:min|mins|minutos|hora|horas|h)(?:\s+\d+\s*(?:min|mins|minutos))?(?:\s*[-–]\s*\d+\s*(?:min|mins|minutos|hora|horas|h))?)\)\s*$/i);
         let time = '';
         if (timeMatch) {
           time = timeMatch[1];
@@ -382,19 +383,29 @@ function parseReport(raw) {
 }
 
 function renderReport(parsed, name) {
-  // Intro
-  const introHtml = parsed.intro
+  // Intro — name highlighted in gold
+  let introHtml = parsed.intro
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<strong>$1</strong>');
+  // Highlight the name wherever it appears
+  if (name) {
+    const nameRegex = new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    introHtml = introHtml.replace(nameRegex, `<span class="name-highlight">${name}</span>`);
+  }
   document.getElementById('reportIntro').innerHTML = introHtml;
 
-  // Priority
-  const prioHtml = parsed.priority
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
-    .replace(/\*(.+?)\*/g, '<strong style="color:#fff">$1</strong>');
-  document.getElementById('priorityText').innerHTML = prioHtml;
-  document.getElementById('prioritySub').innerHTML = parsed.prioritySub
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:rgba(245,240,232,0.85)">$1</strong>');
+  // Priority — NO bold, sentences separated with line breaks
+  let prioText = parsed.priority
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/\.\s+/g, '.<br><br>');
+  document.getElementById('priorityText').innerHTML = prioText;
+
+  let prioSub = parsed.prioritySub
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/\.\s+/g, '.<br><br>');
+  document.getElementById('prioritySub').innerHTML = prioSub;
 
   // Tasks
   const tasksContainer = document.getElementById('reportTasks');
