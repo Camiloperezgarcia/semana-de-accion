@@ -11,13 +11,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid email' });
   }
 
+  // ── Generar ID único para el reporte ──
+  const reportId = 'sa_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+  const reportUrl = `https://accion.miimperiodigital.com?id=${reportId}`;
+
   // ── Textos legibles para campos ──
   const momentoLabel = { A: 'Empezando', B: 'Tiene claridad, falta consistencia', C: 'Vende, no escala' };
   const tipoLabel = { A: 'Mentor', B: 'Prestador de servicios', C: 'Creador de contenido' };
   const horasLabel = { A: 'Menos de 5 horas', B: 'Entre 5 y 15 horas', C: 'Más de 15 horas' };
   const cuelloLabel = { A: 'Contenido y comunidad', B: 'Producto o servicio', C: 'Ventas' };
 
-  // ── Función para guardar en Google Sheets (sin googleapis, JWT manual) ──
+  // ── Función para guardar en Google Sheets (con ID y reporte completo) ──
   async function saveToSheets(data) {
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
@@ -68,7 +72,9 @@ export default async function handler(req, res) {
           momentoLabel[data.momento_negocio] || data.momento_negocio || '',
           tipoLabel[data.tipo_emprendedor] || data.tipo_emprendedor || '',
           horasLabel[data.horas_disponibles] || data.horas_disponibles || '',
-          cuelloLabel[data.cuello_botella] || data.cuello_botella || ''
+          cuelloLabel[data.cuello_botella] || data.cuello_botella || '',
+          data.reportId,
+          data.report
         ]]
       })
     });
@@ -76,7 +82,7 @@ export default async function handler(req, res) {
 
   try {
     // 1. Guardar en Google Sheets (sin bloquear el flujo)
-    saveToSheets({ name, email, momento_negocio, tipo_emprendedor, horas_disponibles, cuello_botella })
+    saveToSheets({ name, email, momento_negocio, tipo_emprendedor, horas_disponibles, cuello_botella, reportId, report: report || '' })
       .catch(err => console.error('Sheets error:', err));
 
     // 2. Registrar en MailerLite con campos personalizados
@@ -99,21 +105,8 @@ export default async function handler(req, res) {
       })
     });
 
-    // 3. Enviar email con checklist via Resend
+    // 3. Enviar email con LINK al reporte (no el reporte completo)
     if (report) {
-      const reportHtml = report
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-        .replace(/^# (.+)$/gm,'<h2 style="font-family:Arial,sans-serif;font-size:18px;font-weight:700;color:#1A1A2E;margin:24px 0 8px;padding:0">$1</h2>')
-        .replace(/^## (.+)$/gm,'<h3 style="font-family:Arial,sans-serif;font-size:16px;font-weight:700;color:#C9A84C;margin:20px 0 6px;padding:0">$1</h3>')
-        .replace(/^### (.+)$/gm,'<h4 style="font-size:15px;font-weight:700;color:#1A1A2E;margin:14px 0 4px;padding:0;font-family:Arial,sans-serif">$1</h4>')
-        .replace(/\*\*(.+?)\*\*/g,'<strong style="color:#1A1A2E;font-weight:700">$1</strong>')
-        .replace(/\*(.+?)\*/g,'<strong style="color:#1A1A2E;font-weight:700">$1</strong>')
-        .replace(/☐/g,'&#9744;')
-        .replace(/^---$/gm,'<hr style="border:none;border-top:1px solid rgba(201,168,76,0.3);margin:16px 0">')
-        .replace(/Un Abrazo!\n\nCamilo Pérez\nMentor de Emprendedores en Negocios Digitales/g,'<p style="margin:32px 0 0;font-size:15px;color:#1A1A2E;font-family:Georgia,serif;line-height:1.8">Un Abrazo!<br><br><strong style="font-size:16px">Camilo Pérez</strong><br><span style="font-size:13px;color:#888">Mentor de Emprendedores en Negocios Digitales</span></p>')
-        .replace(/\n\n/g,'</p><p style="margin:0 0 12px;line-height:1.8;color:#2A2A3E;font-family:Georgia,serif">')
-        .replace(/\n/g,'<br>');
-
       const emailHtml = `
 <!DOCTYPE html>
 <html lang="es">
@@ -124,27 +117,29 @@ export default async function handler(req, res) {
 <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%">
 
   <!-- HEADER -->
-  <tr><td style="background:#FFFFFF;padding:40px 40px 28px;border-radius:12px 12px 0 0;border-top:3px solid #C9A84C">
-    <p style="margin:0 0 16px;font-size:16px;color:#1A1A2E;line-height:1.7;font-family:Georgia,serif">Hola <strong>${name}</strong>,</p>
-    <p style="margin:0 0 14px;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif">Aquí está tu checklist personalizado de la semana. Lo armamos según tu momento, tu tipo de negocio y las horas que tienes disponibles.</p>
-    <p style="margin:0;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif"><strong style="color:#1A1A2E">No lo guardes para después. Ábrelo, léelo y arranca con la primera tarea hoy.</strong></p>
-  </td></tr>
-
-  <!-- BADGE -->
-  <tr><td style="background:#1A1A2E;padding:22px 40px">
-    <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#C9A84C;letter-spacing:0.18em;text-transform:uppercase;font-family:Arial,sans-serif">TU SEMANA DE ACCIÓN</p>
-    <p style="margin:0;font-size:22px;font-weight:700;color:#FFFFFF;font-family:Georgia,serif">Checklist personalizado para ${name}</p>
-  </td></tr>
-
-  <!-- CHECKLIST -->
-  <tr><td style="background:#FFFFFF;padding:32px 40px">
-    <p style="margin:0 0 12px;line-height:1.8;color:#2A2A3E;font-family:Georgia,serif">${reportHtml}</p>
+  <tr><td style="background:#FFFFFF;padding:40px 40px 32px;border-radius:12px 12px 0 0;border-top:3px solid #C9A84C">
+    <p style="margin:0 0 20px;font-size:16px;color:#1A1A2E;line-height:1.7;font-family:Georgia,serif">Hola <strong>${name}</strong>,</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif">Tu checklist personalizado de la semana está listo. Lo creamos según tu momento, tu tipo de negocio y las horas que tienes disponibles.</p>
+    <p style="margin:0 0 24px;font-size:15px;color:#2A2A3E;line-height:1.8;font-family:Georgia,serif"><strong style="color:#1A1A2E">Adentro vas a encontrar:</strong></p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px">
+      <tr><td style="padding:12px 16px;background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.25);border-radius:8px">
+        <p style="margin:0 0 8px;font-size:14px;color:#1A1A2E;font-family:Arial,sans-serif"><strong>🎯 Tu prioridad #1</strong> de la semana</p>
+        <p style="margin:0 0 8px;font-size:14px;color:#1A1A2E;font-family:Arial,sans-serif"><strong>☑️ Checklist interactivo</strong> con tareas que puedes ir marcando</p>
+        <p style="margin:0;font-size:14px;color:#1A1A2E;font-family:Arial,sans-serif"><strong>⚡ Tu acción #1</strong> para empezar hoy mismo</p>
+      </td></tr>
+    </table>
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr><td align="center">
+        <a href="${reportUrl}" target="_blank" style="display:inline-block;background:#C9A84C;color:#1A1A2E;font-family:Arial,sans-serif;font-size:15px;font-weight:700;padding:16px 40px;border-radius:10px;text-decoration:none;letter-spacing:0.02em">Ver mi checklist interactivo →</a>
+      </td></tr>
+    </table>
+    <p style="margin:20px 0 0;font-size:13px;color:rgba(26,26,46,0.4);text-align:center;font-family:Arial,sans-serif">Puedes volver a abrirlo cuando quieras desde este link.</p>
   </td></tr>
 
   <!-- CTA FINAL -->
   <tr><td style="background:#1A1A2E;padding:28px 40px">
     <p style="margin:0 0 16px;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif">¿Quieres construir un negocio digital con estructura real, no con improvisación?</p>
-    <p style="margin:0 0 20px;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif;font-style:italic">¿Cómo te fue con tu checklist? <strong style="color:#FFFFFF;font-style:normal">Responde este correo y cuéntame. Lo leo personalmente.</strong></p>
+    <p style="margin:0;font-size:15px;color:rgba(245,240,232,0.85);line-height:1.7;font-family:Georgia,serif;font-style:italic">¿Cómo te fue con tu checklist? <strong style="color:#FFFFFF;font-style:normal">Responde este correo y cuéntame. Lo leo personalmente.</strong></p>
   </td></tr>
 
   <!-- FOOTER -->
@@ -167,13 +162,13 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           from: 'Camilo Pérez García <camilo@miimperiodigital.com>',
           to: [email],
-          subject: `${name}, tu semana de acción está aquí ✦`,
+          subject: `${name}, tu semana de acción está lista ✦`,
           html: emailHtml
         })
       });
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true, reportId });
 
   } catch (err) {
     console.error('Subscribe error:', err);
