@@ -143,7 +143,7 @@
       <div class="feature-chip"><span class="icon">🎯</span><strong>1 prioridad clara</strong></div>
       <div class="feature-chip"><span class="icon">📧</span><strong>Llega a tu email</strong></div>
     </div>
-    <button class="btn-primary" onclick="startQuiz()">Armar mi semana <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="btn-primary" onclick="startQuiz()">Crear mi semana <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="footer">Por <a href="https://instagram.com/camiloperezgarcia" target="_blank">@camiloperezgarcia</a></div>
   </div>
 
@@ -175,7 +175,7 @@
   <!-- LOADING -->
   <div class="screen" id="screen-loading" style="text-align:center;padding:2.5rem 0">
     <div style="width:52px;height:52px;border:3px solid var(--navy-border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1.5rem"></div>
-    <div style="font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem">Armando tu semana<span style="color:var(--gold)" id="loadingName"></span></div>
+    <div style="font-family:'Sora',sans-serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.4rem">Creando tu semana<span style="color:var(--gold)" id="loadingName"></span></div>
     <div style="font-size:13px;color:var(--navy-text-dim)">Generando tu checklist personalizado...</div>
   </div>
 
@@ -471,6 +471,35 @@ async function generateReport(){
     emailErr.textContent='Hubo un error. Intenta de nuevo.';emailErr.style.display='block';
   }
 }
+
+// ── Cargar reporte guardado si hay ?id= en la URL ──
+async function loadSavedReport() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (!id) return;
+
+  // Mostrar loading
+  document.getElementById('loadingName').textContent = '';
+  showScreen('loading');
+
+  try {
+    const res = await fetch(`/api/get-report?id=${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error('Report not found');
+    const data = await res.json();
+
+    const parsed = parseReport(data.report || '');
+    renderReport(parsed, data.name);
+    window._rawReport = data.report;
+    window._userName = data.name;
+    showScreen('report');
+  } catch (err) {
+    console.error('Error loading saved report:', err);
+    showScreen('welcome');
+  }
+}
+
+// Ejecutar al cargar la página
+loadSavedReport();
 
 function downloadPDF(){
   var nombre=window._userName||'';
