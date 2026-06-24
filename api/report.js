@@ -80,7 +80,12 @@ El checklist debe tener entre 400 y 550 palabras. Usa exactamente esta estructur
 1. Saludo breve y personalizado a ${name} (1-2 líneas, sin título, algo como "Listo, ${name}. Tu semana ya tiene ruta.")
 
 2. ## Tu prioridad #1 esta semana
-   Explica cuál es la prioridad y por qué, conectándola con su momento y su cuello de botella. Sé específico, no genérico. (2-3 líneas)
+   Explica cuál es la prioridad y por qué, conectándola con su momento y su cuello de botella. IMPORTANTE para esta sección:
+   - NO uses negrilla (ni ** ni *) en esta sección
+   - Escribe frases cortas y directas, una idea por oración
+   - Máximo 3-4 oraciones
+   - Separa cada oración con punto y seguido
+   - Ejemplo de tono: "Tienes audiencia pero no está comprando. El problema no es visibilidad. Esta semana necesitas mapear tu proceso de ventas real."
 
 3. ## Tu checklist de la semana
    Lista exactamente ${alcance.tareas} concretas, específicas y accionables. Cada tarea debe:
@@ -98,8 +103,10 @@ El checklist debe tener entre 400 y 550 palabras. Usa exactamente esta estructur
 REGLAS IMPORTANTES:
 - Habla en segunda persona (tú)
 - Usa lenguaje neutro e inclusivo: evita términos que asuman género
+- NUNCA uses anglicismos ni palabras en inglés (no "salesy", no "engagement", no "leads", no "funnel"). Usa siempre el equivalente en español natural
 - Las tareas deben ser ESPECÍFICAS para su tipo de emprendedor y su cuello de botella, no genéricas
 - No incluyas tareas que no pueda hacer con las horas que tiene disponibles
+- Los tiempos estimados deben ser simples: usa solo "(30 min)", "(1 hora)", "(45 min)", "(2 horas)". No combines unidades como "(1 hora 15 min)", redondea al valor más cercano
 - Tono: cercano, práctico, como alguien que ya recorrió este camino y te dice exactamente qué hacer
 - Cuando uses palabras entre asteriscos simples como *palabra*, escríbelas entre doble asterisco **palabra** para que queden en negrilla
 - Evita usar guiones largos (—) en el texto; usa comas o punto y coma para separar ideas
